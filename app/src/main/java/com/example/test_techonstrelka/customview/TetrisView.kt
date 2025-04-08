@@ -3,6 +3,7 @@ package com.example.test_techonstrelka.customview
 
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -11,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.View
+import com.example.test_techonstrelka.datarepo.TaskRepository
 
 class TetrisView @JvmOverloads constructor(
     context: Context,
@@ -18,6 +20,7 @@ class TetrisView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    val database = TaskRepository(context)
     private val paint = Paint()
     private val cellSize = 50f
     private val gridWidth = 10
@@ -32,15 +35,20 @@ class TetrisView @JvmOverloads constructor(
     private val updateDelay = 500L // milliseconds
     private var isPaused = false
 
-    private val pieces = arrayOf(
-        arrayOf(intArrayOf(1, 1, 1, 1)), // I
-        arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)), // O
-        arrayOf(intArrayOf(0, 1, 0), intArrayOf(1, 1, 1)), // T
-        arrayOf(intArrayOf(1, 1, 0), intArrayOf(0, 1, 1)), // Z
-        arrayOf(intArrayOf(0, 1, 1), intArrayOf(1, 1, 0)), // S
-        arrayOf(intArrayOf(1, 0, 0), intArrayOf(1, 1, 1)), // L
-        arrayOf(intArrayOf(0, 0, 1), intArrayOf(1, 1, 1))  // J
-    )
+
+    private fun getPiece (blockForm: Int) : Array<IntArray> {
+        var Array: Array<IntArray> = arrayOf()
+        when(blockForm) {
+            1 -> Array = arrayOf(intArrayOf(1, 1, 1, 1)) // I
+            2 -> Array = arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)) // O
+            3 -> Array = arrayOf(intArrayOf(0, 1, 0), intArrayOf(1, 1, 1)) // T
+            4 -> Array =  arrayOf(intArrayOf(1, 1, 0), intArrayOf(0, 1, 1)) // Z
+            5 -> Array = arrayOf(intArrayOf(0, 1, 1), intArrayOf(1, 1, 0)) // S
+            6 -> Array =  arrayOf(intArrayOf(1, 0, 0), intArrayOf(1, 1, 1)) // L
+            7 -> Array =  arrayOf(intArrayOf(0, 0, 1), intArrayOf(1, 1, 1))  // J
+        }
+        return Array
+    }
 
     private val colors = arrayOf(
         Color.CYAN, Color.YELLOW, Color.MAGENTA,
