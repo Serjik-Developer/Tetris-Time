@@ -81,9 +81,9 @@ class MainActivity : AppCompatActivity() {
                     val level = inputLevel.text.toString().toInt()
                     val blockform = hours.toInt()
                     val cathegory = inputCathegory.text.toString()
-
                     database.addTask(name, description, level, cathegory, hours, blockform)
                     tetrisView.resumeGame()
+
 
                 }
                 .setNegativeButton("Сохранять дальше") { _, _ ->

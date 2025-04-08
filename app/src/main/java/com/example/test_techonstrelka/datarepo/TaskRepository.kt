@@ -3,8 +3,6 @@ package com.example.test_techonstrelka.datarepo
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
-import java.util.UUID
-
 
 
 class TaskRepository(context: Context) {
@@ -83,6 +81,37 @@ class TaskRepository(context: Context) {
         cursor.close()
         db.close()
         return tasks
+    }
+
+    // Получение задачи по ID
+    fun getTaskById(taskId: String?): Task? {
+        val db = databaseHelper.readableDatabase
+        val cursor = db.query(
+            TABLE_TASKS,
+            null,                         // Все столбцы
+            "$COLUMN_ID = ?",             // Условие WHERE
+            arrayOf(taskId.toString()),   // Аргументы для WHERE
+            null, null, null
+        )
+
+        return if (cursor.moveToFirst()) {
+            Task(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESC)),
+                level = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)),
+                category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME)),
+                blockForm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BLOCKFORM))
+            ).also {
+                cursor.close()
+                db.close()
+            }
+        } else {
+            cursor.close()
+            db.close()
+            null
+        }
     }
 
     data class Task(
