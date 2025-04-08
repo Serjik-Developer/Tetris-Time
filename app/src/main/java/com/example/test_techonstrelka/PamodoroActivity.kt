@@ -10,7 +10,8 @@ import android.widget.Button
 import android.widget.TextView
 
 class PomodoroActivity : AppCompatActivity() {
-
+//TODO - ПОСМОТРЕЛ НА РАБОТУ, КРУЖЕК НЕ УМЕНЬШАЕТСЯ, СИДЕЛ СМОТРЕЛ НЕСКОЛЬКО МИНУТ, ПО ОСТАЛЬНОМУ НОРМАЛЬНО, ВСЕ КОРЕКТНО ОТОБРАЖАЕТСЯ(ВРОДЕ) ПОДПРАВЬ КРУЖЕК
+//TODO - КРУЖЕК ПОДПРАВИШЬ - ЦЕНЫ ТЕБЕ НЕ БУДЕТ, ЧТО Я ИМЕЮ ВВИДУ, ОН НЕ УМЕНЬШАЕТСЯ ПО ИСТЕЧЕНИЮ ВРЕМЕНИ, ЕЩЕ ОДИН МОМЕНТ СВЯЗАННЫЙ С БАЗОЙ ДАННЫХ ОБСУДИМ ЛИЧНО
     private var isWorkTime = true
     private var isRunning = false
     private lateinit var timer: CountDownTimer
