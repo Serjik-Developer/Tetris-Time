@@ -5,110 +5,158 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFF"
+    android:background="#121212"
     tools:context=".PomodoroActivity">
 
-    <!-- Заголовок метода -->
-    <TextView
-        android:id="@+id/titleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Метод Помидора"
-        android:textSize="24sp"
-        android:textColor="#000"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+    <!-- Круглый таймер -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/timerCard"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:layout_marginTop="40dp"
+        app:cardBackgroundColor="#121212"
+        app:cardCornerRadius="140dp"
+        app:strokeColor="#4CAF50"
+        app:strokeWidth="6dp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Описание проблемы -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
 
-    <!-- Название текущей задачи -->
+            <TextView
+                android:id="@+id/timerText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25:00"
+                android:textColor="#FFFFFF"
+                android:textSize="56sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Рабочий режим"
+                android:textColor="#4CAF50"
+                android:textSize="16sp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Название проблемы -->
     <TextView
-        android:id="@+id/problemText"
+        android:id="@+id/problemTitleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:text="Проблема: Не могу сосредоточиться на задаче, постоянно отвлекаюсь"
-        android:textColor="#666"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="32dp"
+        android:text="Проблема:"
+        android:textColor="#4CAF50"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timerCard"/>
+
+    <!-- Описание проблемы -->
+    <TextView
+        android:id="@+id/problemDescriptionText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:contentDescription="@string/app_name"
+        android:text=" "
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
+        app:layout_constraintTop_toBottomOf="@id/problemTitleText" />
 
-    <!-- Описание задачи -->
+    <!-- Название задачи -->
     <TextView
-        android:id="@+id/taskNameText"
+        android:id="@+id/taskTitleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="60dp"
-        android:gravity="center"
-        android:text="Задача: Подготовить презентацию"
-        android:textColor="#333"
-        android:textSize="20sp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="32dp"
+        android:text="Текущая задача:"
+        android:textColor="#4CAF50"
+        android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/problemText" />
+        app:layout_constraintTop_toBottomOf="@id/problemDescriptionText"/>
 
-    <!-- Таймер -->
-    <!-- Красный для работы -->
-    app:layout_constraintTop_toBottomOf="@id/taskDescriptionText"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginTop="48dp"/>
-
-    <!-- Кнопки управления -->
+    <!-- Описание задачи -->
     <TextView
         android:id="@+id/taskDescriptionText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="316dp"
-        android:gravity="center"
-        android:text="Описание: Сделать 10 слайдов по новому проекту"
-        android:textColor="#666"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:contentDescription="@string/app_name"
+        android:text=" "
+        android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/taskNameText" />
+        app:layout_constraintTop_toBottomOf="@id/taskTitleText" />
 
-    <TextView
-        android:id="@+id/timerText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="25:00"
-        android:textColor="#E53935"
-        android:textSize="72sp"
-        tools:layout_editor_absoluteX="116dp"
-        tools:layout_editor_absoluteY="258dp" />
-
-    <Button
-        android:id="@+id/startButton"
+    <!-- Панель управления -->
+    <LinearLayout
+        android:id="@+id/controlsLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="8dp"
-        android:text="Старт"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="3"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/timerText" />
+        app:layout_constraintTop_toBottomOf="@id/taskDescriptionText">
 
-    <TextView
-        android:id="@+id/statusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        android:text="Режим: Работа (25 мин)"
-        android:textColor="#666"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/startButton" />
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Сброс"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Старт"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"/>
+
+        <Button
+            android:id="@+id/skipButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Пропустить"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#4CAF50"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
