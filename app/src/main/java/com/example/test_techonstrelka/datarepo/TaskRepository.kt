@@ -3,6 +3,7 @@ package com.example.test_techonstrelka.datarepo
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
+import com.example.test_techonstrelka.models.Task
 
 
 class TaskRepository(context: Context) {
@@ -35,6 +36,7 @@ class TaskRepository(context: Context) {
 
     // Добавление новой задачи
     fun addTask(
+        id: String,
         name: String,
         description: String,
         level: Int,
@@ -44,7 +46,7 @@ class TaskRepository(context: Context) {
     ): Long {
         val db = databaseHelper.writableDatabase
         val values = ContentValues().apply {
-            // Don't put ID - it will auto-increment
+            put(COLUMN_ID, id)
             put(COLUMN_NAME, name)
             put(COLUMN_DESC, description)
             put(COLUMN_LEVEL, level)
@@ -69,7 +71,7 @@ class TaskRepository(context: Context) {
 
         while (cursor.moveToNext()) {
             tasks.add(Task(
-                id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                 name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
                 description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESC)),
                 level = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)),
@@ -96,7 +98,7 @@ class TaskRepository(context: Context) {
 
         return if (cursor.moveToFirst()) {
             Task(
-                id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID)),
                 name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
                 description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESC)),
                 level = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)),
@@ -114,13 +116,5 @@ class TaskRepository(context: Context) {
         }
     }
 
-    data class Task(
-        val id: Int,
-        val name: String,
-        val description: String,
-        val level: Int,
-        val category: String,
-        val time: String,
-        val blockForm: Int
-    )
+
 }

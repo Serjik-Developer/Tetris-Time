@@ -11,8 +11,10 @@ import android.graphics.RectF
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import com.example.test_techonstrelka.datarepo.TaskRepository
+import com.example.test_techonstrelka.models.ElementModel
 
 class TetrisView @JvmOverloads constructor(
     context: Context,
@@ -34,6 +36,10 @@ class TetrisView @JvmOverloads constructor(
     private val handler = Handler(Looper.getMainLooper())
     private val updateDelay = 500L // milliseconds
     private var isPaused = false
+    val activeElements = mutableListOf<ElementModel>()
+    private val placedElements = mutableListOf<ElementModel>()
+    private var currentElement: ElementModel? = null
+    private var elementRequestListener: (() -> Unit)? = null
 
 
     private fun getPiece (blockForm: Int) : Array<IntArray> {
@@ -73,7 +79,20 @@ class TetrisView @JvmOverloads constructor(
             return Piece(newShape, color)
         }
     }
-
+    fun setElementRequestListener(listener: () -> Unit) {
+        elementRequestListener = listener
+    }
+    fun addNewElement(element: ElementModel) {
+        activeElements.add(element)
+        if (currentPiece == null && !isPaused) {
+            spawnPiece()
+            // Force a redraw and restart the update loop if needed
+            invalidate()
+            if (!handler.hasCallbacks(updateRunnable)) {
+                handler.post(updateRunnable)
+            }
+        }
+    }
     private val updateRunnable = object : Runnable {
         override fun run() {
             if (!isPaused && currentPiece != null && !moveDown()) {
@@ -109,14 +128,32 @@ class TetrisView @JvmOverloads constructor(
     }
 
     private fun spawnPiece() {
-        val randomIndex = (0 until pieces.size).random()
-        currentPiece = Piece(pieces[randomIndex], colors[randomIndex])
-        nextX = gridWidth / 2 - currentPiece!!.shape[0].size / 2
-        nextY = 0
+        if (activeElements.isEmpty()) {
+            elementRequestListener?.invoke()
+            return
+        }
+        currentElement = activeElements.first()
+        try {
+            val shape = getPiece(currentElement!!.blockForm.toInt())
+            currentPiece = Piece(shape, colors.random())
+            nextX = gridWidth / 2 - currentPiece!!.shape[0].size / 2
+            nextY = 0
+        } catch (e: Exception) {
+            // Handle potential number format exceptions
+            Log.e("TetrisView", "Error creating piece: ${e.message}")
+            activeElements.remove(currentElement)
+            currentElement = null
+            if (activeElements.isNotEmpty()) {
+                spawnPiece() // Try with next element
+            } else {
+                elementRequestListener?.invoke()
+            }
+        }
     }
 
     private fun placePiece() {
         val piece = currentPiece ?: return
+        val element = currentElement ?: return
 
         for (i in 0 until piece.shape.size) {
             for (j in 0 until piece.shape[0].size) {
@@ -129,7 +166,22 @@ class TetrisView @JvmOverloads constructor(
                 }
             }
         }
+
+        // Move element from active to placed list
+        activeElements.remove(element)
+        placedElements.add(element)
         currentPiece = null
+        currentElement = null
+
+        clearLines()
+
+        // Check if we need more elements
+        if (activeElements.isEmpty()) {
+            elementRequestListener?.invoke()
+        } else {
+            spawnPiece()
+            invalidate() // Force immediate redraw
+        }
     }
 
     private fun moveDown(): Boolean {
@@ -247,12 +299,12 @@ class TetrisView @JvmOverloads constructor(
     }
 
     fun resumeGame() {
-        if (isPaused && currentPiece != null) {
+        if (isPaused) {
             isPaused = false
+            // Always post the runnable when resuming, not just when currentPiece exists
             handler.post(updateRunnable)
         }
     }
-
     fun togglePause() {
         if (isPaused) {
             resumeGame()

@@ -12,7 +12,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test_techonstrelka.customview.TetrisView
 import com.example.test_techonstrelka.datarepo.TaskRepository
+import com.example.test_techonstrelka.models.ElementModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tetrisView: TetrisView
@@ -22,23 +24,29 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
+        database = TaskRepository(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        database = TaskRepository(this)
         tetrisView = findViewById(R.id.tetrisView)
         startButton = findViewById(R.id.startButton)
         scoreText = findViewById(R.id.scoreText)
         val btn = findViewById<Button>(R.id.addButton)
         startButton.setOnClickListener {
+            val elements = database.getAllTasks().map {
+                ElementModel(it.id, it.blockForm.toString())
+            }
+            tetrisView.activeElements.addAll(elements)
             tetrisView.startGame()
             startButton.visibility = View.GONE
         }
-
+        tetrisView.setElementRequestListener {
+            showAddDialog()
+        }
         tetrisView.setScoreListener { score ->
             scoreText.text = "Score: $score"
         }
         btn.setOnClickListener {
-        showAddDialog()
+            showAddDialog()
         }
 
 
@@ -81,9 +89,11 @@ class MainActivity : AppCompatActivity() {
                     val level = inputLevel.text.toString().toInt()
                     val blockform = hours.toInt()
                     val cathegory = inputCathegory.text.toString()
-                    database.addTask(name, description, level, cathegory, hours, blockform)
+                    val id = UUID.randomUUID().toString()
+                    database.addTask(id, name, description, level, cathegory, hours, blockform)
+                    val newElement = ElementModel(id, blockform.toString())
+                    tetrisView.addNewElement(newElement)
                     tetrisView.resumeGame()
-
 
                 }
                 .setNegativeButton("Сохранять дальше") { _, _ ->
@@ -93,7 +103,11 @@ class MainActivity : AppCompatActivity() {
                     val level = inputLevel.text.toString().toInt()
                     val cathegory = inputCathegory.text.toString()
                     val blockform = hours.toInt()
-                    database.addTask(name, description, level, cathegory, hours, blockform)
+                    val id = UUID.randomUUID().toString()
+                    database.addTask(id, name, description, level, cathegory, hours, blockform)
+                    val newElement = ElementModel(id, blockform.toString())
+                    tetrisView.addNewElement(newElement)
+                    showAddDialog()
                 }
                 .show()
         } catch (e: Exception) {

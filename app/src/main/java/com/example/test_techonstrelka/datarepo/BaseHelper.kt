@@ -11,7 +11,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
 
     companion object {
         private const val DATABASE_NAME = "Tasks.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         private const val TABLE_TASKS = "tasks"
         private const val COLUMN_ID = "id"
@@ -24,7 +24,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
 
         private const val CREATE_TABLE_TASKS = """
             CREATE TABLE $TABLE_TASKS (
-                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_ID TEXT PRIMARY KEY,
                 $COLUMN_NAME TEXT,
                 $COLUMN_DESC TEXT,
                 $COLUMN_LEVEL INTEGER,
