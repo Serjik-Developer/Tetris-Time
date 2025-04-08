@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Стиль для современных кнопок -->
+    <style name="ModernButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">16dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="backgroundTint">@color/purple_500</item>
+    </style>
+
+    <!-- Стиль для кнопок цветов -->
+    <style name="ColorButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">24dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+    </style>
+    <style name="MaterialAlertDialog_Rounded" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Стиль для текста в EditText -->
+    <style name="TextAppearance.MaterialComponents.Body1" parent="TextAppearance.MaterialComponents.Body1" tools:ignore="ResourceCycle">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Стиль для кнопок -->
+    <style name="TextAppearance.MaterialComponents.Button" parent="TextAppearance.MaterialComponents.Button" tools:ignore="ResourceCycle">
+        <item name="android:textColor">@color/purple_500</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+</resources>

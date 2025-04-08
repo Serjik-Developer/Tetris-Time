@@ -30,6 +30,7 @@ class TetrisView @JvmOverloads constructor(
     private var scoreListener: ((Int) -> Unit)? = null
     private val handler = Handler(Looper.getMainLooper())
     private val updateDelay = 500L // milliseconds
+    private var isPaused = false
 
     private val pieces = arrayOf(
         arrayOf(intArrayOf(1, 1, 1, 1)), // I
@@ -67,7 +68,7 @@ class TetrisView @JvmOverloads constructor(
 
     private val updateRunnable = object : Runnable {
         override fun run() {
-            if (currentPiece != null && !moveDown()) {
+            if (!isPaused && currentPiece != null && !moveDown()) {
                 placePiece()
                 clearLines()
                 spawnPiece()
@@ -77,7 +78,9 @@ class TetrisView @JvmOverloads constructor(
                 }
             }
             invalidate()
-            handler.postDelayed(this, updateDelay)
+            if (!isPaused) {
+                handler.postDelayed(this, updateDelay)
+            }
         }
     }
 
@@ -228,6 +231,26 @@ class TetrisView @JvmOverloads constructor(
             }
         }
         return false
+    }
+
+    fun pauseGame() {
+        isPaused = true
+        handler.removeCallbacks(updateRunnable)
+    }
+
+    fun resumeGame() {
+        if (isPaused && currentPiece != null) {
+            isPaused = false
+            handler.post(updateRunnable)
+        }
+    }
+
+    fun togglePause() {
+        if (isPaused) {
+            resumeGame()
+        } else {
+            pauseGame()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
