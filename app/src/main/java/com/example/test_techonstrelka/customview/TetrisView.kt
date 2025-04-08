@@ -1,9 +1,6 @@
 package com.example.test_techonstrelka.customview
 
-
-
 import android.content.Context
-import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -12,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import com.example.test_techonstrelka.datarepo.TaskRepository
 import com.example.test_techonstrelka.models.ElementModel
@@ -22,38 +20,45 @@ class TetrisView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    val database = TaskRepository(context)
+
+    private var gridWidth: Int = 10
+    private var gridHeight: Int = 20
     private val paint = Paint()
-    private val cellSize = 50f
-    private val gridWidth = 10
-    private val gridHeight = 20
-    private val grid = Array(gridWidth) { IntArray(gridHeight) }
+    private val cellSize: Float
+        get() = minOf(
+            width.toFloat() / gridWidth,
+            height.toFloat() / gridHeight
+        )
+    private var grid = Array(gridWidth) { IntArray(gridHeight) }
+    private var elementGrid = Array(gridWidth) { Array<String?>(gridHeight) { null } }
     private var currentPiece: Piece? = null
     private var nextX = 0
     private var nextY = 0
-    private var score = 0
-    private var scoreListener: ((Int) -> Unit)? = null
     private val handler = Handler(Looper.getMainLooper())
-    private val updateDelay = 500L // milliseconds
+    private val updateDelay = 500L
     private var isPaused = false
     val activeElements = mutableListOf<ElementModel>()
     private val placedElements = mutableListOf<ElementModel>()
     private var currentElement: ElementModel? = null
     private var elementRequestListener: (() -> Unit)? = null
-
-
-    private fun getPiece (blockForm: Int) : Array<IntArray> {
-        var Array: Array<IntArray> = arrayOf()
-        when(blockForm) {
-            1 -> Array = arrayOf(intArrayOf(1, 1, 1, 1)) // I
-            2 -> Array = arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)) // O
-            3 -> Array = arrayOf(intArrayOf(0, 1, 0), intArrayOf(1, 1, 1)) // T
-            4 -> Array =  arrayOf(intArrayOf(1, 1, 0), intArrayOf(0, 1, 1)) // Z
-            5 -> Array = arrayOf(intArrayOf(0, 1, 1), intArrayOf(1, 1, 0)) // S
-            6 -> Array =  arrayOf(intArrayOf(1, 0, 0), intArrayOf(1, 1, 1)) // L
-            7 -> Array =  arrayOf(intArrayOf(0, 0, 1), intArrayOf(1, 1, 1))  // J
+    private var elementClickListener: ((String) -> Unit)? = null
+    private var lineFilledListener: ((Int) -> Unit)? = null
+    private var filledLines: MutableList<Int>? = mutableListOf()
+    init {
+        grid = Array(gridWidth) { IntArray(gridHeight) }
+        elementGrid = Array(gridWidth) { Array<String?>(gridHeight) { null } }
+    }
+    private fun getPiece(blockForm: Int): Array<IntArray> {
+        return when (blockForm) {
+            1 -> arrayOf(intArrayOf(1, 1, 1, 1)) // I
+            2 -> arrayOf(intArrayOf(1, 1), intArrayOf(1, 1)) // O
+            3 -> arrayOf(intArrayOf(0, 1, 0), intArrayOf(1, 1, 1)) // T
+            4 -> arrayOf(intArrayOf(1, 1, 0), intArrayOf(0, 1, 1)) // Z
+            5 -> arrayOf(intArrayOf(0, 1, 1), intArrayOf(1, 1, 0)) // S
+            6 -> arrayOf(intArrayOf(1, 0, 0), intArrayOf(1, 1, 1)) // L
+            7 -> arrayOf(intArrayOf(0, 0, 1), intArrayOf(1, 1, 1)) // J
+            else -> arrayOf()
         }
-        return Array
     }
 
     private val colors = arrayOf(
@@ -61,7 +66,7 @@ class TetrisView @JvmOverloads constructor(
         Color.RED, Color.GREEN, Color.BLUE, Color.parseColor("#FFA500")
     )
 
-    private inner class Piece(val shape: Array<IntArray>, val color: Int) {
+    private inner class Piece(val shape: Array<IntArray>, val color: Int, val elementId: String) {
         var x = gridWidth / 2 - shape[0].size / 2
         var y = 0
 
@@ -76,28 +81,33 @@ class TetrisView @JvmOverloads constructor(
                 }
             }
 
-            return Piece(newShape, color)
+            return Piece(newShape, color, elementId)
         }
     }
+
     fun setElementRequestListener(listener: () -> Unit) {
         elementRequestListener = listener
     }
+
+    fun setOnElementClickListener(listener: (String) -> Unit) {
+        elementClickListener = listener
+    }
+
     fun addNewElement(element: ElementModel) {
         activeElements.add(element)
         if (currentPiece == null && !isPaused) {
             spawnPiece()
-            // Force a redraw and restart the update loop if needed
             invalidate()
             if (!handler.hasCallbacks(updateRunnable)) {
                 handler.post(updateRunnable)
             }
         }
     }
+
     private val updateRunnable = object : Runnable {
         override fun run() {
             if (!isPaused && currentPiece != null && !moveDown()) {
                 placePiece()
-                clearLines()
                 spawnPiece()
                 if (isGameOver()) {
                     handler.removeCallbacks(this)
@@ -112,20 +122,16 @@ class TetrisView @JvmOverloads constructor(
     }
 
     fun startGame() {
-        score = 0
-        scoreListener?.invoke(score)
         for (i in 0 until gridWidth) {
             for (j in 0 until gridHeight) {
                 grid[i][j] = 0
+                elementGrid[i][j] = null
             }
         }
         spawnPiece()
         handler.post(updateRunnable)
     }
 
-    fun setScoreListener(listener: (Int) -> Unit) {
-        scoreListener = listener
-    }
 
     private fun spawnPiece() {
         if (activeElements.isEmpty()) {
@@ -135,22 +141,20 @@ class TetrisView @JvmOverloads constructor(
         currentElement = activeElements.first()
         try {
             val shape = getPiece(currentElement!!.blockForm.toInt())
-            currentPiece = Piece(shape, colors.random())
+            currentPiece = Piece(shape, colors.random(), currentElement!!.id)
             nextX = gridWidth / 2 - currentPiece!!.shape[0].size / 2
             nextY = 0
         } catch (e: Exception) {
-            // Handle potential number format exceptions
             Log.e("TetrisView", "Error creating piece: ${e.message}")
             activeElements.remove(currentElement)
             currentElement = null
             if (activeElements.isNotEmpty()) {
-                spawnPiece() // Try with next element
+                spawnPiece()
             } else {
                 elementRequestListener?.invoke()
             }
         }
     }
-
     private fun placePiece() {
         val piece = currentPiece ?: return
         val element = currentElement ?: return
@@ -162,27 +166,49 @@ class TetrisView @JvmOverloads constructor(
                     val y = piece.y + j
                     if (y >= 0) {
                         grid[x][y] = piece.color
+                        elementGrid[x][y] = piece.elementId
                     }
                 }
             }
         }
 
-        // Move element from active to placed list
         activeElements.remove(element)
         placedElements.add(element)
         currentPiece = null
         currentElement = null
 
-        clearLines()
+        checkFilledLines() // Заменяем clearLines на checkFilledLines
 
-        // Check if we need more elements
         if (activeElements.isEmpty()) {
             elementRequestListener?.invoke()
         } else {
             spawnPiece()
-            invalidate() // Force immediate redraw
+            invalidate()
         }
     }
+
+    private fun checkFilledLines() {
+        for (j in 0 until gridHeight) {
+            var isLineFull = true
+            for (i in 0 until gridWidth) {
+                if (grid[i][j] == 0) {
+                    isLineFull = false
+                    break
+                }
+            }
+
+            if (isLineFull && filledLines?.contains(j) == false) {
+
+                lineFilledListener?.invoke(j)
+                filledLines?.add(j)
+            }
+        }
+    }
+
+    fun setLineFilledListener(listener: (Int) -> Unit) {
+        lineFilledListener = listener
+    }
+
 
     private fun moveDown(): Boolean {
         return movePiece(0, 1)
@@ -198,7 +224,6 @@ class TetrisView @JvmOverloads constructor(
 
     private fun movePiece(dx: Int, dy: Int): Boolean {
         val piece = currentPiece ?: return false
-
         val newX = piece.x + dx
         val newY = piece.y + dy
 
@@ -241,49 +266,6 @@ class TetrisView @JvmOverloads constructor(
         return false
     }
 
-    private fun clearLines() {
-        var linesCleared = 0
-
-        var j = gridHeight - 1
-        while (j >= 0) {
-            var isLineFull = true
-            for (i in 0 until gridWidth) {
-                if (grid[i][j] == 0) {
-                    isLineFull = false
-                    break
-                }
-            }
-
-            if (isLineFull) {
-                linesCleared++
-                for (jj in j downTo 1) {
-                    for (i in 0 until gridWidth) {
-                        grid[i][jj] = grid[i][jj - 1]
-                    }
-                }
-                for (i in 0 until gridWidth) {
-                    grid[i][0] = 0
-                }
-                // В Kotlin нельзя использовать j++ в этом контексте
-                // Вместо этого мы остаемся на той же позиции j
-                // так как строки сдвинулись вниз
-            } else {
-                j-- // Переходим к следующей строке только если текущая не была полной
-            }
-        }
-
-        if (linesCleared > 0) {
-            score += when (linesCleared) {
-                1 -> 100
-                2 -> 300
-                3 -> 500
-                4 -> 800
-                else -> 0
-            }
-            scoreListener?.invoke(score)
-        }
-    }
-
     private fun isGameOver(): Boolean {
         for (i in 0 until gridWidth) {
             if (grid[i][0] != 0) {
@@ -301,16 +283,57 @@ class TetrisView @JvmOverloads constructor(
     fun resumeGame() {
         if (isPaused) {
             isPaused = false
-            // Always post the runnable when resuming, not just when currentPiece exists
             handler.post(updateRunnable)
         }
     }
+
     fun togglePause() {
         if (isPaused) {
             resumeGame()
         } else {
             pauseGame()
         }
+    }
+
+    fun setGridSize(width: Int, height: Int) {
+        handler.removeCallbacks(updateRunnable)
+        val newGrid = Array(width) { IntArray(height) }
+        val newElementGrid = Array(width) { Array<String?>(height) { null } }
+        val minWidth = minOf(gridWidth, width)
+        val minHeight = minOf(gridHeight, height)
+
+        for (i in 0 until minWidth) {
+            for (j in 0 until minHeight) {
+                newGrid[i][j] = grid[i][j]
+                newElementGrid[i][j] = elementGrid[i][j]
+            }
+        }
+        grid = newGrid
+        elementGrid = newElementGrid
+        gridWidth = width
+        gridHeight = height
+        currentPiece = null
+        currentElement = null
+        invalidate()
+        if (!isPaused && activeElements.isNotEmpty()) {
+            spawnPiece()
+            handler.post(updateRunnable)
+        }
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            val x = (event.x / cellSize).toInt()
+            val y = (event.y / cellSize).toInt()
+
+            if (x in 0 until gridWidth && y in 0 until gridHeight) {
+                elementGrid[x][y]?.let { elementId ->
+                    elementClickListener?.invoke(elementId)
+                    return true
+                }
+            }
+        }
+        return super.onTouchEvent(event)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -376,8 +399,21 @@ class TetrisView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = (gridWidth * cellSize).toInt()
-        val height = (gridHeight * cellSize).toInt()
+        val desiredWidth = (gridWidth * cellSize).toInt()
+        val desiredHeight = (gridHeight * cellSize).toInt()
+
+        val width = when (MeasureSpec.getMode(widthMeasureSpec)) {
+            MeasureSpec.EXACTLY -> MeasureSpec.getSize(widthMeasureSpec)
+            MeasureSpec.AT_MOST -> minOf(desiredWidth, MeasureSpec.getSize(widthMeasureSpec))
+            else -> desiredWidth
+        }
+
+        val height = when (MeasureSpec.getMode(heightMeasureSpec)) {
+            MeasureSpec.EXACTLY -> MeasureSpec.getSize(heightMeasureSpec)
+            MeasureSpec.AT_MOST -> minOf(desiredHeight, MeasureSpec.getSize(heightMeasureSpec))
+            else -> desiredHeight
+        }
+
         setMeasuredDimension(width, height)
     }
 

@@ -17,9 +17,9 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
         private const val COLUMN_ID = "id"
         private const val COLUMN_NAME = "name_task"
         private const val COLUMN_DESC = "description_task"
-        private const val COLUMN_LEVEL = "level"
+        private const val COLUMN_LEVEL = "level" // LEVEL = 0 -> ВЫПОЛНЕНА ЗАДАЧА, LEVEL = 1 -> ОБЫЧНАЯ ЗАДАЧА, LEVEL = 2 -> POMODORO ЗАДАЧА
         private const val COLUMN_CATEGORY = "category"
-        private const val COLUMN_TIME = "time"
+        private const val COLUMN_TIME = "time" //КОЛИЧЕСТВО 30 МИНУТ В ПЕРИОДЕ ВРЕМЕНИ(2 часа = 4)
         private const val COLUMN_BLOCKFORM = "blockform" // форма блока
 
         private const val CREATE_TABLE_TASKS = """
@@ -29,7 +29,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
                 $COLUMN_DESC TEXT,
                 $COLUMN_LEVEL INTEGER,
                 $COLUMN_CATEGORY TEXT,
-                $COLUMN_TIME TEXT,
+                $COLUMN_TIME TEXT, 
                 $COLUMN_BLOCKFORM INTEGER
             )
         """

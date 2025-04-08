@@ -1,9 +1,13 @@
 package com.example.test_techonstrelka
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.InputType
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -28,6 +32,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         tetrisView = findViewById(R.id.tetrisView)
+
+        val mode = intent.getIntExtra("MODE", -1)
+        val (rows, columns) = when (mode) {
+            0 -> Pair(10, 12)
+            1 -> Pair(12, 7)
+            2 -> Pair(6, 5)
+            else -> Pair(20, 10)
+        }
+
+        tetrisView.setGridSize(columns, rows)
+
+
         startButton = findViewById(R.id.startButton)
         scoreText = findViewById(R.id.scoreText)
         val btn = findViewById<Button>(R.id.addButton)
@@ -42,15 +58,80 @@ class MainActivity : AppCompatActivity() {
         tetrisView.setElementRequestListener {
             showAddDialog()
         }
-        tetrisView.setScoreListener { score ->
-            scoreText.text = "Score: $score"
-        }
         btn.setOnClickListener {
             showAddDialog()
         }
+        tetrisView.setLineFilledListener { lineNumber ->
+            Toast.makeText(this, "Строка $lineNumber заполнена!", Toast.LENGTH_SHORT).show()
+        }
+        tetrisView.setOnElementClickListener { elementId ->
+            // Handle the element click here
+            Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
+            showInfoDialog(elementId)
 
-
+        }
     }
+
+    @SuppressLint("SetTextI18n")
+    private fun showInfoDialog(elementId: String) {
+        try {
+            tetrisView.pauseGame()
+            val element = database.getTaskById(elementId) ?: run {
+                Toast.makeText(this, "Элемент не найден", Toast.LENGTH_SHORT).show()
+                tetrisView.resumeGame()
+                return
+            }
+
+            val infoText = TextView(this).apply {
+                textSize = 16f
+                setPadding(50, 30, 50, 30)
+                text = """
+            Название: ${element.name}
+            Описание: ${element.description}
+            Уровень важности: ${element.level}
+            Категория: ${element.category}
+            Время выполнения: ${element.time} часов
+            Форма блока: ${when(element.blockForm) {
+                    1 -> "I"
+                    2 -> "O"
+                    3 -> "T"
+                    4 -> "Z"
+                    5 -> "S"
+                    6 -> "L"
+                    7 -> "J"
+                    else -> "Неизвестно"
+                }}
+            """.trimIndent()
+            }
+
+            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
+                .setTitle("Информация о деле")
+                .setView(infoText)
+                .setPositiveButton("Закрыть") { _, _ ->
+                    tetrisView.resumeGame()
+                }
+                .setOnDismissListener {
+                    tetrisView.resumeGame()
+                }
+
+
+            if (element.level == 2) { //ВРЕМЕНО ДОБАВЛЕН УРОВЕНЬ ВАЖНОСТИ 2, ПОЗЖЕ БУДЕТ ОБСУЖДАТЬСЯ КОНКРЕТНЫЙ
+                dialogBuilder.setNeutralButton("Таймер") { _, _ ->
+                    val intent = Intent(this, PomodoroActivity::class.java).apply {
+                        putExtra("name", elementId)
+                    }
+                    startActivity(intent)
+                }
+            }
+
+            dialogBuilder.show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Ошибка при отображении информации", Toast.LENGTH_SHORT).show()
+            Log.e("INFO_DIALOG", "Error: ${e.message}")
+            tetrisView.resumeGame()
+        }
+    }
+
     private fun showAddDialog() {
         try {
             tetrisView.pauseGame()
@@ -63,9 +144,27 @@ class MainActivity : AppCompatActivity() {
             }
             val inputHours = EditText(this).apply {
                 hint = "Введите количество часов"
+                inputType = InputType.TYPE_CLASS_NUMBER
+                filters = arrayOf(InputFilter.LengthFilter(3))
             }
             val inputLevel = EditText(this).apply {
                 hint = "Введите уровень важности"
+                inputType = InputType.TYPE_CLASS_NUMBER
+                filters = arrayOf(
+                    InputFilter.LengthFilter(1),
+                    InputFilter { source, start, end, dest, dstart, dend ->
+                        if (source.isNotEmpty()) {
+                            val newValue = source.toString().toIntOrNull()
+                            if (newValue != null && newValue in 1..2) {
+                                null
+                            } else {
+                                ""
+                            }
+                        } else {
+                            null
+                        }
+                    }
+                )
             }
             val inputCathegory = EditText(this).apply {
                 hint = "Введите категорию"

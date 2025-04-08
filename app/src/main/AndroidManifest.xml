@@ -13,11 +13,13 @@
         android:theme="@style/Theme.Testtechonstrelka"
         tools:targetApi="31">
         <activity
-            android:name=".PamodoroActivity"
-            android:exported="false">
-        </activity>
-        <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PomodoroActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".ChooseActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
