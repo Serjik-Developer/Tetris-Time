@@ -1,19 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center"
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/scoreText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="Score: 0"
+        android:textSize="24sp"
+        android:layout_marginBottom="16dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray">
+
+        <com.example.test_techonstrelka.customview.TetrisView
+            android:id="@+id/tetrisView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Game"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/leftButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:onClick="onLeftClick"/>
+
+        <Button
+            android:id="@+id/rotateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rotate"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:onClick="onRotateClick"/>
+
+        <Button
+            android:id="@+id/rightButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→"
+            android:onClick="onRightClick"
+            tools:ignore="OnClick" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/dropButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Drop"
+        android:layout_marginTop="8dp"
+        android:onClick="onDropClick"/>
+
+</LinearLayout>
