@@ -64,6 +64,22 @@ class TetrisView @JvmOverloads constructor(
         placedElements.removeAll { it.id == elementId }
         applyGravity()
         invalidate()
+        handler.post { checkFilledLines() }
+    }
+    fun refreshElements(elements: List<ElementModel>) {
+        activeElements.clear()
+        activeElements.addAll(elements)
+        placedElements.clear()
+        for (i in 0 until gridWidth) {
+            for (j in 0 until gridHeight) {
+                grid[i][j] = 0
+                elementGrid[i][j] = null
+            }
+        }
+        invalidate()
+        if (!handler.hasCallbacks(updateRunnable) && !isPaused) {
+            handler.post(updateRunnable)
+        }
     }
     private fun applyGravity() {
         for (i in 0 until gridWidth) {

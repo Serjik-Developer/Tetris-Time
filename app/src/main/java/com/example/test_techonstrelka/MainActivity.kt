@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity() {
             else -> Pair(20, 10)
         }
 
+
+
         tetrisView.setGridSize(columns, rows)
         tetrisView.setGameOverListener {
             runOnUiThread {
@@ -452,5 +454,32 @@ class MainActivity : AppCompatActivity() {
 
     fun onDropClick(view: View) {
         tetrisView.onDrop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (AppData.needsRefresh) {
+            if (AppData.idToRemove.isNotEmpty()) {
+                database.deleteTask(AppData.idToRemove)
+                tetrisView.removeElement(AppData.idToRemove)
+                AppData.idToRemove = ""
+            }
+            refreshGameState()
+            AppData.needsRefresh = false
+        }
+    }
+
+    private fun refreshGameState() {
+        val elements = database.getAllTasks(interval).map {
+            ElementModel(it.id, it.blockForm.toString())
+        }
+        tetrisView.activeElements.clear()
+        tetrisView.activeElements.addAll(elements)
+        tetrisView.invalidate()
+        if (elements.isEmpty()) {
+            showAddDialog()
+        } else {
+            tetrisView.startGame()
+        }
     }
 }

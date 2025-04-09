@@ -1,6 +1,7 @@
 package com.example.test_techonstrelka
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -155,6 +156,9 @@ class PomodoroActivity : AppCompatActivity() {
         timerText.setTextColor(Color.RED)
         statusText.setTextColor(Color.RED)
         statusText.text = "Время истекло"
+        AppData.idToRemove = id
+        AppData.needsRefresh = true
+        repoTask.deleteTask(id)
         try {
             repoTask.deleteTask(id)
         } catch (e: Exception) {
