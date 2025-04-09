@@ -3,6 +3,9 @@ package com.example.test_techonstrelka
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
@@ -23,6 +26,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import com.example.test_techonstrelka.customview.TetrisView
 import com.example.test_techonstrelka.datarepo.TaskRepository
 import com.example.test_techonstrelka.models.ElementModel
@@ -72,7 +78,6 @@ class MainActivity : AppCompatActivity() {
         }
         tetrisView.setLineFilledListener { lineNumber ->
             showCongratilationDialog()
-            Toast.makeText(this, "Строка $lineNumber заполнена!", Toast.LENGTH_SHORT).show()
         }
         tetrisView.setOnElementClickListener { elementId ->
             Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
@@ -107,29 +112,44 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCongratilationDialog() {
         try {
-            val conglArray = arrayOf("У тебя мать сдохла", "Ты долбаеб!", "Учись играть свинья!").random()
+            val tips = mapOf(
+                "Планируй день заранее" to "Составь список задач накануне вечером",
+                "Ставь приоритеты" to "Выделяй самые важные задачи и выполняй их первыми",
+                "Минимизируй отвлекающие факторы" to "Отключи уведомления и сосредоточься на работе",
+                "Периодически оценивай прогресс" to "Периодически оценивай прогресс"
+            )
+
+            val randomTip = tips.entries.random()
+
             tetrisView.pauseGame()
-            val congl = TextView(this).apply {
-                textSize = 16f
-                text = conglArray
 
-
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.congrat_dialog, null).apply {
+                findViewById<TextView>(R.id.tipTitle).text = randomTip.key
+                findViewById<TextView>(R.id.tipDescription).text = randomTip.value
             }
-            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
-                .setTitle("Поздравляем!")
-                .setView(congl)
-                .setPositiveButton("Закрыть") { _, _ ->
-                    tetrisView.resumeGame()
-                }
+
+            val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_RoundedCongl)
+                .setView(dialogView)
                 .setOnDismissListener {
                     tetrisView.resumeGame()
                 }
-            dialogBuilder.show()
-        } catch (e: Exception) {
+                .create()
 
+            dialogView.findViewById<Button>(R.id.closeButton).setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.window?.apply {
+                setBackgroundDrawableResource(android.R.color.transparent)
+            }
+
+            dialog.show()
+
+        } catch (e: Exception) {
+            tetrisView.resumeGame()
+            Log.e("CongratDialog", "Error: ${e.message}")
         }
     }
-
     @SuppressLint("SetTextI18n")
     private fun showInfoDialog(elementId: String) {
         try {
@@ -206,7 +226,6 @@ class MainActivity : AppCompatActivity() {
 
 
             val dialogView = layoutInflater.inflate(R.layout.add_dialog, null).apply {
-                // Убедимся, что макет заполняет весь доступный размер
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
