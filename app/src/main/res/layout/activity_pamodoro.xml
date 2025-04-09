@@ -9,6 +9,7 @@
     tools:context=".PomodoroActivity">
 
 
+
     <!-- Круглый прогресс-бар -->
     <FrameLayout
         android:layout_width="280dp"

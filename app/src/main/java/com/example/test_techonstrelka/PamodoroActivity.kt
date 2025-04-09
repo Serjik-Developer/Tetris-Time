@@ -135,6 +135,7 @@ class PomodoroActivity : AppCompatActivity() {
         if (isRunning) {
             startTimer()
         }
+
     }
 
     private fun updateUI() {
