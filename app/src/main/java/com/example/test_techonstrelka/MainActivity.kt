@@ -9,14 +9,18 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test_techonstrelka.customview.TetrisView
 import com.example.test_techonstrelka.datarepo.TaskRepository
@@ -189,76 +193,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     private fun showAddDialog() {
 
         if (isAddDialogShowing) return
         try {
             isAddDialogShowing = true
             tetrisView.pauseGame()
-            val inputName = EditText(this).apply {
-                hint = "Введите название дела"
-            }
 
-            val inputDesc = EditText(this).apply {
-                hint = "Введите описание дела"
-            }
-            val inputHours = SeekBar(this).apply {
-                max = 11
-                progress = 0
-            }
-            val seekBarValueText = TextView(this).apply {
-                text = "Выбрано часов: ${inputHours.progress}"
-                textSize = 16f
-                setPadding(0, 10, 0, 10)
-            }
-            seekBarValueText.text = "Выбрано часов: 1"
-            inputHours.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    seekBarValueText.text = "Выбрано часов: ${progress+1}"
-                }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-            val importanceOptions = arrayOf("Обычная задача", "Важная задача")
-            val importanceSpinner = android.widget.Spinner(this).apply {
-                adapter = android.widget.ArrayAdapter(
-                    this@MainActivity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    importanceOptions
-                )
-            }
-            val cathegoryOptions = arrayOf("Работа", "Учеба", "Личные дела")
-            val cathegorySpinner = android.widget.Spinner(this).apply {
-                adapter = android.widget.ArrayAdapter(
-                    this@MainActivity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    cathegoryOptions
+            val dialogView = layoutInflater.inflate(R.layout.add_dialog, null).apply {
+                // Убедимся, что макет заполняет весь доступный размер
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
                 )
             }
 
             val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
-                .setTitle("Создать дело")
-                .setView(LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    setPadding(50, 20, 50, 20)
-                    addView(inputName)
-                    addView(inputDesc)
-                    addView(inputHours)
-                    addView(importanceSpinner)
-                    addView(cathegorySpinner)
-                    addView(seekBarValueText)
+                .setView(dialogView)
+                .setOnDismissListener {
+                    isAddDialogShowing = false
+                    tetrisView.resumeGame()
+                }
+                .create()
+            dialog.window?.apply {
+                // Устанавливаем флаги для фиксированного размера
+                setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                )
+
+                // Явно устанавливаем размеры и параметры
+                setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                setBackgroundDrawableResource(android.R.color.transparent)
+
+                // Ключевая настройка - предотвращаем изменение размера
+            }
+
+            dialog.setOnShowListener {
+                val spinner: Spinner = dialogView.findViewById(R.id.taskTypeSpinner)
+                val catspinner: Spinner = dialogView.findViewById(R.id.cathegoryTypeSpinner)
+                val types = listOf("Обычная задача", "Важная задача")
+                val cattypes = listOf("Работа", "Учеба", "Личные дела")
+                val adapter = ArrayAdapter(this, R.layout.spinner_item_white, types).apply {
+                    setDropDownViewResource(R.layout.spinner_dropdown_item_white)
+                }
+                val catadapter = ArrayAdapter(this, R.layout.spinner_item_white, cattypes).apply {
+                    setDropDownViewResource(R.layout.spinner_dropdown_item_white)
+                }
+                spinner.adapter = adapter
+                catspinner.adapter = catadapter
+
+                val btnToGame = dialogView.findViewById<Button>(R.id.buttontogame)
+                val btnAddMore = dialogView.findViewById<ImageButton>(R.id.imageButtonAddMore)
+                val btnDelete = dialogView.findViewById<ImageButton>(R.id.DeleteAll)
+                val seekBarValueText = dialogView.findViewById<TextView>(R.id.textView9)
+                val inputHours = dialogView.findViewById<SeekBar>(R.id.seekBar)
+                inputHours.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        val hoursCount = (progress+1)/2.0
+                        seekBarValueText.text = "${hoursCount.toString() } часов"
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
                 })
-                .setPositiveButton("Сохранить и играть") { dialogInterface, _ ->
-                    val name = inputName.text.toString()
-                    val description = inputDesc.text.toString()
+                btnToGame.setOnClickListener {
+                    val name = dialogView.findViewById<EditText>(R.id.editTextText).text.toString()
+                    val description = dialogView.findViewById<EditText>(R.id.editTextText2).text.toString()
                     val hours = inputHours.progress + 1
-
-                    val level = if (importanceSpinner.selectedItemPosition == 0) 1 else 2
+                    val level = if (spinner.selectedItemPosition == 0) 1 else 2
                     val blockform = hours
-                    val cathegory = cathegorySpinner.selectedItem.toString()
+                    val cathegory = catspinner.selectedItem.toString()
                     val id = UUID.randomUUID().toString()
-
                     if (name.isNotEmpty() && description.isNotEmpty() && hours.toString().isNotEmpty() && cathegory.isNotEmpty()) {
                         database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
                         val newElement = ElementModel(id, blockform.toString())
@@ -271,22 +281,19 @@ class MainActivity : AppCompatActivity() {
                             tetrisView.invalidate()
                         }
 
-                        dialogInterface.dismiss()
+                        dialog.dismiss()
                     } else {
                         Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .setNegativeButton("Сохранять дальше") { _, _ ->
-
-                    val name = inputName.text.toString()
-                    val description = inputDesc.text.toString()
-                    val hours = inputHours.progress + 1
-
-                    val level = if (importanceSpinner.selectedItemPosition == 0) 1 else 2
+                btnAddMore.setOnClickListener {
+                    val name = dialogView.findViewById<EditText>(R.id.editTextText).text.toString()
+                    val description = dialogView.findViewById<EditText>(R.id.editTextText2).text.toString()
+                    val hours = dialogView.findViewById<SeekBar>(R.id.seekBar).progress + 1
+                    val level = if (spinner.selectedItemPosition == 0) 1 else 2
                     val blockform = hours
-                    val cathegory = cathegorySpinner.selectedItem.toString()
+                    val cathegory = catspinner.selectedItem.toString()
                     val id = UUID.randomUUID().toString()
-
                     if (name.isNotEmpty() && description.isNotEmpty() && hours.toString().isNotEmpty() && cathegory.isNotEmpty()) {
                         if (!tetrisView.isPaused){
                             tetrisView.pauseGame()
@@ -294,9 +301,9 @@ class MainActivity : AppCompatActivity() {
                         database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
                         val newElement = ElementModel(id, blockform.toString())
                         tetrisView.addNewElement(newElement)
-                        inputName.text.clear()
-                        inputDesc.text.clear()
-                        inputHours.progress = 0
+                        dialogView.findViewById<EditText>(R.id.editTextText).text.clear()
+                        dialogView.findViewById<EditText>(R.id.editTextText2).text.clear()
+                        dialogView.findViewById<SeekBar>(R.id.seekBar).progress = 0
                         isAddDialogShowing = false
 
                         showAddDialog()
@@ -304,18 +311,10 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .setOnDismissListener {
-                    isAddDialogShowing = false
-                    tetrisView.resumeGame()
+                btnDelete.setOnClickListener {
+
                 }
-                .create()
-
-            dialog.setOnShowListener {
-                inputName.text.clear()
-                inputDesc.text.clear()
-                inputHours.progress = 0
             }
-
             dialog.show()
         } catch (e: Exception) {
             isAddDialogShowing = false

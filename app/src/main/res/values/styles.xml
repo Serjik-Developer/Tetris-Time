@@ -41,5 +41,22 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">#303030</item>
     </style>
+    <style name="FullScreenDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+    <style name="WhiteSpinnerText" parent="Widget.AppCompat.Spinner">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:spinnerMode">dropdown</item>
+        <item name="android:popupTheme">@style/SpinnerPopupStyle</item>
+    </style>
 
+    <style name="SpinnerPopupStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">#555555</item>
+    </style>
 </resources>

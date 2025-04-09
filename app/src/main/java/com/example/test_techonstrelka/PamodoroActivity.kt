@@ -46,8 +46,8 @@ class PomodoroActivity : AppCompatActivity() {
         val repoTask = TaskRepository(this)
         val id = intent.getStringExtra("name")
 
-        val time : Int = (repoTask.getTaskById(id)?.time)?.toInt()?.div(2) ?: 0
-        timeTask.setText("Время задачи: "+time+" часа")
+        val time = (repoTask.getTaskById(id)?.time)?.toDouble()?.div(2.0)
+        timeTask.setText("Часы выполенения задачи: $time")
 
 
         startButton.setOnClickListener {
