@@ -59,11 +59,36 @@ class MainActivity : AppCompatActivity() {
             showAddDialog()
         }
         tetrisView.setLineFilledListener { lineNumber ->
+            showCongratilationDialog()
             Toast.makeText(this, "Строка $lineNumber заполнена!", Toast.LENGTH_SHORT).show()
         }
         tetrisView.setOnElementClickListener { elementId ->
             Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
             showInfoDialog(elementId)
+
+        }
+    }
+
+    private fun showCongratilationDialog() {
+        try {
+            val conglArray = arrayOf("У тебя мать сдохла", "Ты долбаеб!", "Учись играть свинья!").random()
+            tetrisView.pauseGame()
+            val congl = TextView(this).apply {
+                textSize = 16f
+                text = conglArray
+
+            }
+            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
+                .setTitle("Поздравляем!")
+                .setView(congl)
+                .setPositiveButton("Закрыть") { _, _ ->
+                    tetrisView.resumeGame()
+                }
+                .setOnDismissListener {
+                    tetrisView.resumeGame()
+                }
+            dialogBuilder.show()
+        } catch (e: Exception) {
 
         }
     }
