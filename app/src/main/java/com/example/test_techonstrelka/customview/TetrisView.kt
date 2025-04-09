@@ -43,7 +43,11 @@ class TetrisView @JvmOverloads constructor(
     private var lineFilledListener: ((Int) -> Unit)? = null
     private var filledLines: MutableList<Int>? = mutableListOf()
     private var isRequestingElement = false
+    private var gameOverListener: (() -> Unit)? = null
 
+    fun setGameOverListener(listener: () -> Unit) {
+        gameOverListener = listener
+    }
     init {
         grid = Array(gridWidth) { IntArray(gridHeight) }
         elementGrid = Array(gridWidth) { Array<String?>(gridHeight) { null } }
@@ -188,14 +192,13 @@ class TetrisView @JvmOverloads constructor(
 
     private val updateRunnable = object : Runnable {
         override fun run() {
-            if (!isPaused && currentPiece != null) {
-                if (!moveDown()) {
-                    placePiece()
-                    spawnPiece()
-                    if (isGameOver()) {
-                        handler.removeCallbacks(this)
-                        return
-                    }
+            if (!isPaused && currentPiece != null && !moveDown()) {
+                placePiece()
+                spawnPiece()
+                if (isGameOver()) {
+                    handler.removeCallbacks(this)
+                    gameOverListener?.invoke() // Add this line
+                    return
                 }
             }
             invalidate()
