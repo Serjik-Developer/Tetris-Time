@@ -8,7 +8,20 @@
     android:background="#121212"
     android:backgroundTint="#555555"
     tools:context=".PomodoroActivity">
-
+    <ImageButton
+        android:id="@+id/addMoreTime"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:adjustViewBounds="false"
+        android:background="#00978A8A"
+        android:baselineAlignBottom="false"
+        android:cropToPadding="false"
+        android:scaleType="centerInside"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/plus" />
     <!-- Кнопка назад -->
     <ImageButton
         android:id="@+id/backButton"
@@ -84,25 +97,6 @@
         </LinearLayout>
     </FrameLayout>
 
-    <LinearLayout
-        android:id="@+id/controlsLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="32dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:weightSum="3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintVertical_bias="0.366">
-
-    </LinearLayout>
-
     <Button
         android:id="@+id/resetButton"
         android:layout_width="110dp"
@@ -120,14 +114,14 @@
 
     <Button
         android:id="@+id/skipButton"
-        android:layout_width="120dp"
+        android:layout_width="110dp"
         android:layout_height="65dp"
         android:layout_marginEnd="20dp"
         android:layout_weight="1"
         android:backgroundTint="#333333"
         android:text="Готово"
         android:textColor="#FFFFFF"
-        android:textSize="20dp"
+        android:textSize="19sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/resetButton"
         app:layout_constraintEnd_toEndOf="parent"
@@ -135,7 +129,7 @@
 
     <Button
         android:id="@+id/startButton"
-        android:layout_width="120dp"
+        android:layout_width="105dp"
         android:layout_height="65dp"
         android:layout_marginStart="20dp"
         android:layout_weight="1"

@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test_techonstrelka.customview.CircularProgressView
 import com.example.test_techonstrelka.datarepo.TaskRepository
@@ -17,7 +19,10 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var timer: CountDownTimer
     private val workTime = 25 * 60 * 1000L
     private val breakTime = 5 * 60 * 1000L
-    private var timeLeftInMillis = workTime // Текущее оставшееся время
+    private var timeLeftInMillis = workTime
+    private var cyclesCompleted = 0
+    private var maxCycles = 0
+    private var isTimeExpired = false
 
     private lateinit var startButton: Button
     private lateinit var timerText: TextView
@@ -27,13 +32,12 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var progressView: CircularProgressView
     private lateinit var timeTask: TextView
     private lateinit var backButton: ImageButton
-
+    private lateinit var addMoreTime: ImageView
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pamodoro)
-
         startButton = findViewById(R.id.startButton)
         timerText = findViewById(R.id.timerText)
         statusText = findViewById(R.id.statusText)
@@ -42,37 +46,67 @@ class PomodoroActivity : AppCompatActivity() {
         progressView = findViewById(R.id.progressView)
         timeTask = findViewById(R.id.taskTimeText)
         backButton = findViewById(R.id.backButton)
+        addMoreTime = findViewById(R.id.addMoreTime)
 
         val repoTask = TaskRepository(this)
         val id = intent.getStringExtra("name")
 
-        val time = (repoTask.getTaskById(id)?.time)?.toDouble()?.div(2.0)
-        timeTask.setText("Часы выполенения задачи: $time")
-
-
+        maxCycles = repoTask.getTaskById(id)?.time?.toInt() ?: 0
+        val time = maxCycles.toDouble().div(2.0)
+        timeTask.setText("Часы выполнения задачи: $time")
         startButton.setOnClickListener {
-            if (isRunning) pauseTimer() else startTimer()
+            if (!isTimeExpired) {
+                if (isRunning) pauseTimer() else startTimer()
+            }
         }
 
         resetButton.setOnClickListener {
-            resetTimer()
+            if (!isTimeExpired) {
+                resetTimer()
+            }
         }
 
         skipButton.setOnClickListener {
-            skipToNextPhase()
+            if (!isTimeExpired) {
+                skipToNextPhase()
+                if (!isRunning) {
+                    startTimer()
+                }
+            }
         }
 
-        backButton.setOnClickListener{
-            setupBackButton()
+        backButton.setOnClickListener {
+            returnToMainActivity()
+        }
+        addMoreTime.setOnClickListener {
+            if (isTimeExpired) {
+                addAdditionalCycle()
+            }
         }
 
         updateUI()
         updateTimerText(timeLeftInMillis)
+    }
 
-
+    private fun addAdditionalCycle() {
+        maxCycles++
+        val time = maxCycles.toDouble().div(2.0)
+        timeTask.setText("Часы выполнения задачи: $time")
+        isTimeExpired = false
+        startButton.isEnabled = true
+        resetButton.isEnabled = true
+        skipButton.isEnabled = true
+        timerText.setTextColor(Color.WHITE)
+        statusText.setTextColor(if (isWorkTime) Color.parseColor("#4CAF50") else Color.parseColor("#2196F3"))
+        statusText.text = if (isWorkTime) "Режим: Работа (25 мин)" else "Режим: Отдых (5 мин)"
+        if (!isRunning) {
+            startTimer()
+        }
     }
 
     private fun startTimer() {
+        if (isTimeExpired) return
+
         timer = object : CountDownTimer(timeLeftInMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
@@ -82,6 +116,14 @@ class PomodoroActivity : AppCompatActivity() {
 
             override fun onFinish() {
                 timeLeftInMillis = 0
+                if (isWorkTime) {
+                    cyclesCompleted++
+                    if (cyclesCompleted >= maxCycles && maxCycles > 0) {
+                        Toast.makeText(this@PomodoroActivity, "Время вышло", Toast.LENGTH_LONG).show()
+                        timeExpired()
+                        return
+                    }
+                }
                 switchPhase()
             }
         }.start()
@@ -91,13 +133,15 @@ class PomodoroActivity : AppCompatActivity() {
         updateUI()
     }
 
+    private fun timeExpired() {
+        isTimeExpired = true
+        startButton.isEnabled = false
+        resetButton.isEnabled = false
+        skipButton.isEnabled = false
 
-    // В классе PomodoroActivity
-     fun setupBackButton() {
-        val backButton: ImageButton = findViewById(R.id.backButton)
-        backButton.setOnClickListener {
-            returnToMainActivity()
-        }
+        timerText.setTextColor(Color.RED)
+        statusText.setTextColor(Color.RED)
+        statusText.text = "Время истекло"
     }
 
     private fun returnToMainActivity() {
@@ -136,6 +180,7 @@ class PomodoroActivity : AppCompatActivity() {
         }
         isWorkTime = true
         timeLeftInMillis = workTime
+        cyclesCompleted = 0
         updateTimerText(timeLeftInMillis)
         progressView.setProgress(0f)
         startButton.text = "Старт"
@@ -147,6 +192,14 @@ class PomodoroActivity : AppCompatActivity() {
             timer.cancel()
             isRunning = false
         }
+        if (isWorkTime) {
+            cyclesCompleted++
+            if (cyclesCompleted >= maxCycles && maxCycles > 0) {
+                Toast.makeText(this@PomodoroActivity, "Время вышло", Toast.LENGTH_LONG).show()
+                timeExpired()
+                return
+            }
+        }
         switchPhase()
     }
 
@@ -156,21 +209,15 @@ class PomodoroActivity : AppCompatActivity() {
         updateTimerText(timeLeftInMillis)
         progressView.setProgress(0f)
         updateUI()
-
-        if (isRunning) {
-            startTimer()
-        }
-
-
     }
 
     private fun updateUI() {
         if (isWorkTime) {
             statusText.text = "Режим: Работа (25 мин)"
-            statusText.setTextColor(Color.parseColor("#4CAF50")) // Зеленый
+            statusText.setTextColor(Color.parseColor("#4CAF50"))
         } else {
             statusText.text = "Режим: Отдых (5 мин)"
-            statusText.setTextColor(Color.parseColor("#2196F3")) // Синий
+            statusText.setTextColor(Color.parseColor("#2196F3"))
         }
     }
 
