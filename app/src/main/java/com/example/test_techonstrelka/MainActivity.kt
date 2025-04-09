@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             showCongratilationDialog()
         }
         tetrisView.setOnElementClickListener { elementId ->
-            Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
             showInfoDialog(elementId)
 
         }
