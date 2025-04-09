@@ -8,20 +8,29 @@
     android:background="#121212"
     tools:context=".PomodoroActivity">
 
-    <!-- Круглый таймер -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/timerCard"
+    <!-- Круглый прогресс-бар -->
+    <FrameLayout
         android:layout_width="280dp"
         android:layout_height="280dp"
         android:layout_marginTop="40dp"
-        app:cardBackgroundColor="#121212"
-        app:cardCornerRadius="140dp"
-        app:strokeColor="#4CAF50"
-        app:strokeWidth="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Фоновый круг -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/circle_background"/>
+
+        <!-- Прогресс -->
+        <ImageView
+            android:id="@+id/progressView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/circle_progress"/>
+
+        <!-- Центральная часть с текстом -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -46,25 +55,28 @@
                 android:textColor="#4CAF50"
                 android:textSize="16sp"/>
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </FrameLayout>
 
     <!-- Название проблемы -->
+
+    <!-- Описание проблемы -->
+
     <TextView
         android:id="@+id/problemTitleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="52dp"
         android:layout_marginEnd="32dp"
         android:text="Проблема:"
         android:textColor="#4CAF50"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/timerCard"/>
+        app:layout_constraintTop_toBottomOf="@id/progressView" />
 
-    <!-- Описание проблемы -->
     <TextView
         android:id="@+id/problemDescriptionText"
         android:layout_width="0dp"
@@ -113,6 +125,7 @@
         app:layout_constraintTop_toBottomOf="@id/taskTitleText" />
 
     <!-- Панель управления -->
+
     <LinearLayout
         android:id="@+id/controlsLayout"
         android:layout_width="0dp"
@@ -121,42 +134,50 @@
         android:layout_marginTop="40dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:orientation="horizontal"
         android:gravity="center"
+        android:orientation="horizontal"
         android:weightSum="3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/taskDescriptionText">
+        app:layout_constraintTop_toBottomOf="@id/taskDescriptionText"
+        app:layout_constraintVertical_bias="0.366">
 
-        <Button
-            android:id="@+id/resetButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Сброс"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50"
-            android:layout_marginEnd="8dp"/>
-
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Старт"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50"/>
-
-        <Button
-            android:id="@+id/skipButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Пропустить"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50"
-            android:layout_marginStart="8dp"/>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:backgroundTint="#4CAF50"
+        android:text="Сброс"
+        android:textColor="#FFFFFF"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="652dp" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="268dp"
+        android:layout_weight="1"
+        android:backgroundTint="#4CAF50"
+        android:text="Старт"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@+id/controlsLayout"
+        tools:layout_editor_absoluteX="161dp" />
+
+    <Button
+        android:id="@+id/skipButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:backgroundTint="#4CAF50"
+        android:text="Готово"
+        android:textColor="#FFFFFF"
+        tools:layout_editor_absoluteX="269dp"
+        tools:layout_editor_absoluteY="628dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

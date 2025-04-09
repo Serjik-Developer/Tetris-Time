@@ -16,10 +16,10 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".PomodoroActivity"
+            android:name=".ChooseActivity"
             android:exported="false"/>
         <activity
-            android:name=".ChooseActivity"
+            android:name=".PomodoroActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

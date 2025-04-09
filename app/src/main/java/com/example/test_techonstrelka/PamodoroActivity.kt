@@ -1,39 +1,44 @@
 package com.example.test_techonstrelka
 
+import android.animation.ValueAnimator
 import android.graphics.Color
+import android.graphics.drawable.RotateDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test_techonstrelka.datarepo.TaskRepository
-import com.google.android.material.card.MaterialCardView
-import android.widget.Button
-import android.widget.TextView
 
 class PomodoroActivity : AppCompatActivity() {
-//TODO - ПОСМОТРЕЛ НА РАБОТУ, КРУЖЕК НЕ УМЕНЬШАЕТСЯ, СИДЕЛ СМОТРЕЛ НЕСКОЛЬКО МИНУТ, ПО ОСТАЛЬНОМУ НОРМАЛЬНО, ВСЕ КОРЕКТНО ОТОБРАЖАЕТСЯ(ВРОДЕ) ПОДПРАВЬ КРУЖЕК
-//TODO - КРУЖЕК ПОДПРАВИШЬ - ЦЕНЫ ТЕБЕ НЕ БУДЕТ, ЧТО Я ИМЕЮ ВВИДУ, ОН НЕ УМЕНЬШАЕТСЯ ПО ИСТЕЧЕНИЮ ВРЕМЕНИ, ЕЩЕ ОДИН МОМЕНТ СВЯЗАННЫЙ С БАЗОЙ ДАННЫХ ОБСУДИМ ЛИЧНО
     private var isWorkTime = true
     private var isRunning = false
     private lateinit var timer: CountDownTimer
-    private val workTime = 25 * 60 * 1000L // 25 минут
-    private val breakTime = 5 * 60 * 1000L // 5 минут
+    private val workTime = 25 * 60 * 1000L
+    private val breakTime = 5 * 60 * 1000L
 
     private lateinit var startButton: Button
     private lateinit var timerText: TextView
     private lateinit var statusText: TextView
-    private lateinit var timerCard: MaterialCardView
     private lateinit var resetButton: Button
     private lateinit var skipButton: Button
+    private lateinit var progressView: ImageView
+    private lateinit var progressDrawable: RotateDrawable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pamodoro)
+
         startButton = findViewById(R.id.startButton)
         timerText = findViewById(R.id.timerText)
         statusText = findViewById(R.id.statusText)
-        timerCard = findViewById(R.id.timerCard)
         resetButton = findViewById(R.id.resetButton)
         skipButton = findViewById(R.id.skipButton)
+        progressView = findViewById(R.id.progressView)
+
+        progressDrawable = progressView.drawable as RotateDrawable
+        progressDrawable.level = 0
 
         val repoTask = TaskRepository(this)
         val id = intent.getStringExtra("name")
@@ -41,8 +46,8 @@ class PomodoroActivity : AppCompatActivity() {
         val taskName = findViewById<TextView>(R.id.problemTitleText)
         val problemDesc = findViewById<TextView>(R.id.problemDescriptionText)
 
-        taskName.setText(repoTask.getTaskById(id)?.name)
-        problemDesc.setText(repoTask.getTaskById(id)?.description)
+        taskName.text = repoTask.getTaskById(id)?.name
+        problemDesc.text = repoTask.getTaskById(id)?.description
 
         startButton.setOnClickListener {
             if (isRunning) pauseTimer() else startTimer()
@@ -55,6 +60,8 @@ class PomodoroActivity : AppCompatActivity() {
         skipButton.setOnClickListener {
             skipToNextPhase()
         }
+
+        updateUI()
     }
 
     private fun startTimer() {
@@ -76,20 +83,27 @@ class PomodoroActivity : AppCompatActivity() {
         updateUI()
     }
 
-    private fun updateTimerText(millisUntilFinished: Long) {
-        val minutes = millisUntilFinished / 1000 / 60
-        val seconds = millisUntilFinished / 1000 % 60
-        timerText.text = String.format("%02d:%02d", minutes, seconds)
+    private fun updateProgress(millisLeft: Long, totalTime: Long) {
+        val progress = (millisLeft.toFloat() / totalTime.toFloat() * 10000).toInt()
+        progressDrawable.level = progress
+        val hue = if (isWorkTime) {
+            120f * (1 - millisLeft.toFloat() / totalTime.toFloat())
+        } else {
+            240f - (120f * (1 - millisLeft.toFloat() / totalTime.toFloat()))
+        }
+        val color = Color.HSVToColor(floatArrayOf(hue, 1f, 1f))
+        val animator = ValueAnimator.ofArgb(statusText.currentTextColor, color)
+        animator.duration = 300
+        animator.addUpdateListener { animator ->
+            statusText.setTextColor(animator.animatedValue as Int)
+        }
+        animator.start()
     }
 
-    private fun updateProgress(millisLeft: Long, totalTime: Long) {
-        val progress = millisLeft.toFloat() / totalTime.toFloat()
-        val color = if (isWorkTime) {
-            Color.HSVToColor(floatArrayOf(progress * 120f, 1f, 1f)) // От красного к желтому
-        } else {
-            Color.HSVToColor(floatArrayOf(progress * 120f + 120f, 1f, 1f)) // От зеленого к синему
-        }
-        timerCard.strokeColor = color
+    private fun updateTimerText(millisUntilFinished: Long) {
+        val minutes = (millisUntilFinished / 1000) / 60
+        val seconds = (millisUntilFinished / 1000) % 60
+        timerText.text = String.format("%02d:%02d", minutes, seconds)
     }
 
     private fun pauseTimer() {
@@ -102,6 +116,7 @@ class PomodoroActivity : AppCompatActivity() {
         if (isRunning) timer.cancel()
         isWorkTime = true
         timerText.text = "25:00"
+        progressDrawable.level = 0
         isRunning = false
         startButton.text = "Старт"
         updateUI()
@@ -114,6 +129,7 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun switchPhase() {
         isWorkTime = !isWorkTime
+        progressDrawable.level = 0
         updateUI()
         if (isRunning) startTimer()
     }
@@ -121,10 +137,10 @@ class PomodoroActivity : AppCompatActivity() {
     private fun updateUI() {
         if (isWorkTime) {
             statusText.text = "Режим: Работа (25 мин)"
-            timerCard.strokeColor = Color.parseColor("#E53935") // Красный
+            statusText.setTextColor(Color.parseColor("#4CAF50")) // Зеленый
         } else {
             statusText.text = "Режим: Отдых (5 мин)"
-            timerCard.strokeColor = Color.parseColor("#4CAF50") // Зеленый
+            statusText.setTextColor(Color.parseColor("#2196F3")) // Синий
         }
     }
 
