@@ -1,9 +1,11 @@
 package com.example.test_techonstrelka
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test_techonstrelka.customview.CircularProgressView
@@ -23,7 +25,11 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var resetButton: Button
     private lateinit var skipButton: Button
     private lateinit var progressView: CircularProgressView
+    private lateinit var timeTask: TextView
+    private lateinit var backButton: ImageButton
 
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pamodoro)
@@ -34,15 +40,15 @@ class PomodoroActivity : AppCompatActivity() {
         resetButton = findViewById(R.id.resetButton)
         skipButton = findViewById(R.id.skipButton)
         progressView = findViewById(R.id.progressView)
+        timeTask = findViewById(R.id.taskTimeText)
+        backButton = findViewById(R.id.backButton)
 
         val repoTask = TaskRepository(this)
         val id = intent.getStringExtra("name")
 
-        val taskName = findViewById<TextView>(R.id.problemTitleText)
-        val problemDesc = findViewById<TextView>(R.id.problemDescriptionText)
+        val time : Int = (repoTask.getTaskById(id)?.time)?.toInt()?.div(2) ?: 0
+        timeTask.setText("Время задачи: "+time+" часа")
 
-        taskName.text = repoTask.getTaskById(id)?.name
-        problemDesc.text = repoTask.getTaskById(id)?.description
 
         startButton.setOnClickListener {
             if (isRunning) pauseTimer() else startTimer()
@@ -56,8 +62,14 @@ class PomodoroActivity : AppCompatActivity() {
             skipToNextPhase()
         }
 
+        backButton.setOnClickListener{
+            setupBackButton()
+        }
+
         updateUI()
         updateTimerText(timeLeftInMillis)
+
+
     }
 
     private fun startTimer() {
@@ -77,6 +89,19 @@ class PomodoroActivity : AppCompatActivity() {
         isRunning = true
         startButton.text = "Пауза"
         updateUI()
+    }
+
+
+    // В классе PomodoroActivity
+     fun setupBackButton() {
+        val backButton: ImageButton = findViewById(R.id.backButton)
+        backButton.setOnClickListener {
+            returnToMainActivity()
+        }
+    }
+
+    private fun returnToMainActivity() {
+        finish()
     }
 
     private fun updateProgress(millisLeft: Long, totalTime: Long) {
