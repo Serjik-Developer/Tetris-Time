@@ -91,6 +91,7 @@ class PomodoroActivity : AppCompatActivity() {
         val hue = if (isWorkTime) {
             120f * (millisLeft.toFloat() / totalTime.toFloat())
         } else {
+
             240f - (120f * (millisLeft.toFloat() / totalTime.toFloat()))
         }
         val color = Color.HSVToColor(floatArrayOf(hue, 1f, 1f))
