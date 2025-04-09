@@ -19,7 +19,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
         private const val COLUMN_DESC = "description_task"
         private const val COLUMN_LEVEL = "level" // LEVEL = 0 -> ВЫПОЛНЕНА ЗАДАЧА, LEVEL = 1 -> ОБЫЧНАЯ ЗАДАЧА, LEVEL = 2 -> POMODORO ЗАДАЧА
         private const val COLUMN_CATEGORY = "category"
-        private const val COLUMN_TIME = "time" //КОЛИЧЕСТВО 30 МИНУТ В ПЕРИОДЕ ВРЕМЕНИ(2 часа = 4)
+        private const val COLUMN_TIME = "time" //КОЛИЧЕСТВО 30 МИНУТ В ПЕРИОДЕ ВРЕМЕНИ(2 часа = 4); для недели 1 еденица времени(далее е.в.) = 2; для месяца 1 е.в = сутки
         private const val COLUMN_BLOCKFORM = "blockform" // форма блока
         private const val COLUMN_INTERVAL = "interval" // 0-> day 1-> week 2-> month
 

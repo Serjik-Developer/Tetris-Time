@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -33,6 +34,9 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var timeTask: TextView
     private lateinit var backButton: ImageButton
     private lateinit var addMoreTime: ImageView
+    private lateinit var repoTask: TaskRepository
+    private var isDay: Boolean = false
+    private var id: String = ""
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,12 +52,15 @@ class PomodoroActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         addMoreTime = findViewById(R.id.addMoreTime)
 
-        val repoTask = TaskRepository(this)
-        val id = intent.getStringExtra("name")
-
+        repoTask = TaskRepository(this)
+        id = intent.getStringExtra("name")!!
+        isDay = intent.getBooleanExtra("IsDay", false)
         maxCycles = repoTask.getTaskById(id)?.time?.toInt() ?: 0
-        val time = maxCycles.toDouble().div(2.0)
-        timeTask.setText("Часы выполнения задачи: $time")
+        if (isDay) {
+            val time = maxCycles.toDouble().div(2.0)
+            timeTask.setText("Часы выполнения задачи: $time")
+        }
+
         startButton.setOnClickListener {
             if (!isTimeExpired) {
                 if (isRunning) pauseTimer() else startTimer()
@@ -90,8 +97,11 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun addAdditionalCycle() {
         maxCycles++
-        val time = maxCycles.toDouble().div(2.0)
-        timeTask.setText("Часы выполнения задачи: $time")
+        if (isDay) {
+            val time = maxCycles.toDouble().div(2.0)
+            timeTask.setText("Часы выполнения задачи: $time")
+        }
+
         isTimeExpired = false
         startButton.isEnabled = true
         resetButton.isEnabled = true
@@ -117,7 +127,9 @@ class PomodoroActivity : AppCompatActivity() {
             override fun onFinish() {
                 timeLeftInMillis = 0
                 if (isWorkTime) {
-                    cyclesCompleted++
+                    if (isDay) {
+                        cyclesCompleted++
+                    }
                     if (cyclesCompleted >= maxCycles && maxCycles > 0) {
                         Toast.makeText(this@PomodoroActivity, "Время вышло", Toast.LENGTH_LONG).show()
                         timeExpired()
@@ -126,6 +138,7 @@ class PomodoroActivity : AppCompatActivity() {
                 }
                 switchPhase()
             }
+
         }.start()
 
         isRunning = true
@@ -142,6 +155,12 @@ class PomodoroActivity : AppCompatActivity() {
         timerText.setTextColor(Color.RED)
         statusText.setTextColor(Color.RED)
         statusText.text = "Время истекло"
+        try {
+            repoTask.deleteTask(id)
+        } catch (e: Exception) {
+            Log.e("ERROR-MAIN", e.message.toString())
+        }
+
     }
 
     private fun returnToMainActivity() {
@@ -193,7 +212,9 @@ class PomodoroActivity : AppCompatActivity() {
             isRunning = false
         }
         if (isWorkTime) {
-            cyclesCompleted++
+            if (isDay) {
+                cyclesCompleted++
+            }
             if (cyclesCompleted >= maxCycles && maxCycles > 0) {
                 Toast.makeText(this@PomodoroActivity, "Время вышло", Toast.LENGTH_LONG).show()
                 timeExpired()

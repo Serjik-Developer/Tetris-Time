@@ -194,14 +194,40 @@ class MainActivity : AppCompatActivity() {
             val closeButton = dialogView.findViewById<Button>(R.id.buttonClose)
             val deleteButton = dialogView.findViewById<Button>(R.id.buttonDelete)
             val timerButton = dialogView.findViewById<Button>(R.id.buttonTimer)
-            val time = element.time.toDouble()/2
-            infoTextView.text = """
+
+            when (interval) {
+                0 -> {
+                    val time = element.time.toDouble()/2
+                    infoTextView.text = """
             Название: ${element.name}
             Описание: ${element.description}
             Уровень важности: ${element.level}
             Категория: ${element.category}
             Время выполнения: ${time} часов
             """.trimIndent()
+
+                }
+                1 -> {
+                    val time = element.time.toDouble()*2
+                    infoTextView.text = """
+            Название: ${element.name}
+            Описание: ${element.description}
+            Уровень важности: ${element.level}
+            Категория: ${element.category}
+            Время выполнения: ${time} часов
+            """.trimIndent()
+                }
+                2 -> {
+                    val time = element.time.toString()
+                    infoTextView.text = """
+            Название: ${element.name}
+            Описание: ${element.description}
+            Уровень важности: ${element.level}
+            Категория: ${element.category}
+            Время выполнения: ${time} суток
+            """.trimIndent()
+                }
+            }
 
             val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Roundeddd)
                 .setView(dialogView)
@@ -223,6 +249,7 @@ class MainActivity : AppCompatActivity() {
                 timerButton.visibility = View.VISIBLE
                 timerButton.setOnClickListener {
                     val intent = Intent(this, PomodoroActivity::class.java)
+                    if (interval==0) intent.putExtra("IsDay", true)
                     intent.putExtra("name", elementId)
                     startActivity(intent)
                     dialog.dismiss()
@@ -300,10 +327,43 @@ class MainActivity : AppCompatActivity() {
                 val btnDelete = dialogView.findViewById<ImageButton>(R.id.DeleteAll)
                 val seekBarValueText = dialogView.findViewById<TextView>(R.id.textView9)
                 val inputHours = dialogView.findViewById<SeekBar>(R.id.seekBar)
+                val textView7 = dialogView.findViewById<TextView>(R.id.textView7)
+                val textView8 = dialogView.findViewById<TextView>(R.id.textView8)
+                when (interval) {
+                    0 -> {
+                        inputHours.max = 11
+                        textView7.text = "30 мин"
+                        textView8.text = "6 часов"
+                    }
+                    1 -> {
+                        inputHours.max = 11
+                        textView7.text = "2 часа"
+                        textView8.text = "24 часа"
+                    }
+                    2 -> {
+                        inputHours.max = 4
+                        textView7.text = "1 сутки"
+                        textView8.text = "5 суток"
+                    }
+                }
+
                 inputHours.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                        val hoursCount = (progress+1)/2.0
-                        seekBarValueText.text = "${hoursCount.toString() } часов"
+                        // Вычисляем значение в зависимости от interval
+                        when (interval) {
+                            0 -> {
+                                val hours = (progress + 1) / 2.0
+                                seekBarValueText.text = "${hours} часов"
+                            }
+                            1 -> {
+                                val hours = (progress + 1) * 2
+                                seekBarValueText.text = "${hours} часов"
+                            }
+                            2 -> {
+                                val days = progress + 1
+                                seekBarValueText.text = if (days == 1) "1 сутки" else "$days суток"
+                            }
+                        }
                     }
 
                     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
