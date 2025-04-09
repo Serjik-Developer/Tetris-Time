@@ -59,4 +59,23 @@
         <item name="android:textColor">@android:color/white</item>
         <item name="android:background">#555555</item>
     </style>
+    <style name="MaterialAlertDialog_Roundeddd" parent="Theme.Material3.DayNight.Dialog.Alert">
+        <!-- Цвет фона диалога -->
+        <item name="android:background">#555555</item>
+        <!-- Округлые углы диалога -->
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+        <!-- Заголовок -->
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <!-- Стиль кнопок -->
+        <item name="buttonBarButtonStyle">@style/CustomDialogButton</item>
+    </style>
+
+    <!-- Стиль для кнопок в диалоге -->
+    <style name="CustomDialogButton">
+        <item name="android:background">@drawable/rounded_button</item> <!-- Можешь создать drawable для округленных кнопок -->
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -139,53 +140,54 @@ class MainActivity : AppCompatActivity() {
                 return
             }
 
-            val infoText = TextView(this).apply {
-                textSize = 16f
-                setPadding(50, 30, 50, 30)
-                text = """
+
+
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.info_dialog, null)
+            val infoTextView = dialogView.findViewById<TextView>(R.id.infoText)
+            val closeButton = dialogView.findViewById<Button>(R.id.buttonClose)
+            val deleteButton = dialogView.findViewById<Button>(R.id.buttonDelete)
+            val timerButton = dialogView.findViewById<Button>(R.id.buttonTimer)
+            val time = element.time.toDouble()/2
+            infoTextView.text = """
             Название: ${element.name}
             Описание: ${element.description}
             Уровень важности: ${element.level}
             Категория: ${element.category}
-            Время выполнения: ${element.time } часов
-            Форма блока: ${when(element.blockForm) {
-                    1 -> "I"
-                    2 -> "O"
-                    3 -> "T"
-                    4 -> "Z"
-                    5 -> "S"
-                    6 -> "L"
-                    7 -> "J"
-                    else -> "Неизвестно"
-                }}
+            Время выполнения: ${time} часов
             """.trimIndent()
+
+            val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Roundeddd)
+                .setView(dialogView)
+                .create()
+
+            closeButton.setOnClickListener {
+                tetrisView.resumeGame()
+                dialog.dismiss()
             }
 
-            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
-                .setTitle("Информация о деле")
-                .setView(infoText)
-                .setPositiveButton("Закрыть") { _, _ ->
-                    tetrisView.resumeGame()
-                }.setNegativeButton("Удалить дело") { _, _ ->
-                    database.deleteTask(elementId)
-                    tetrisView.removeElement(elementId)
-                    tetrisView.resumeGame()
-                }
-                .setOnDismissListener {
-                    tetrisView.resumeGame()
-                }
-
+            deleteButton.setOnClickListener {
+                database.deleteTask(elementId)
+                tetrisView.removeElement(elementId)
+                tetrisView.resumeGame()
+                dialog.dismiss()
+            }
 
             if (element.level == 2) {
-                dialogBuilder.setNeutralButton("Таймер") { _, _ ->
-                    val intent = Intent(this, PomodoroActivity::class.java).apply {
-                        putExtra("name", elementId)
-                    }
+                timerButton.visibility = View.VISIBLE
+                timerButton.setOnClickListener {
+                    val intent = Intent(this, PomodoroActivity::class.java)
+                    intent.putExtra("name", elementId)
                     startActivity(intent)
+                    dialog.dismiss()
                 }
             }
 
-            dialogBuilder.show()
+            dialog.setOnDismissListener {
+                tetrisView.resumeGame()
+            }
+
+            dialog.show()
+
         } catch (e: Exception) {
             Toast.makeText(this, "Ошибка при отображении информации", Toast.LENGTH_SHORT).show()
             Log.e("INFO_DIALOG", "Error: ${e.message}")
