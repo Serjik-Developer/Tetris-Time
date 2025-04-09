@@ -19,6 +19,7 @@ class TaskRepository(context: Context) {
         private const val COLUMN_CATEGORY = "category"
         private const val COLUMN_TIME = "time"
         private const val COLUMN_BLOCKFORM = "blockform"
+        private const val COLUMN_INTERVAL = "interval"
 
         private const val CREATE_TABLE_TASKS = """
             CREATE TABLE $TABLE_TASKS (
@@ -42,7 +43,8 @@ class TaskRepository(context: Context) {
         level: Int,
         category: String,
         time: String,
-        blockForm: Int
+        blockForm: Int,
+        interval: Int
     ): Long {
         val db = databaseHelper.writableDatabase
         val values = ContentValues().apply {
@@ -53,6 +55,7 @@ class TaskRepository(context: Context) {
             put(COLUMN_CATEGORY, category)
             put(COLUMN_TIME, time)
             put(COLUMN_BLOCKFORM, blockForm)
+            put(COLUMN_INTERVAL, interval)
         }
         return db.insert(TABLE_TASKS, null, values).also {
             db.close()
@@ -61,12 +64,15 @@ class TaskRepository(context: Context) {
     }
 
     // Получение всех задач
-    fun getAllTasks(): List<Task> {
+    fun getAllTasks(interval: Int): List<Task> {
         val tasks = mutableListOf<Task>()
         val db = databaseHelper.readableDatabase
         val cursor = db.query(
             TABLE_TASKS,
-            null, null, null, null, null, null
+            null,
+            "$COLUMN_INTERVAL = ?",  // Фильтр по интервалу
+            arrayOf(interval.toString()),
+            null, null, null
         )
 
         while (cursor.moveToNext()) {
@@ -77,7 +83,8 @@ class TaskRepository(context: Context) {
                 level = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)),
                 category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
                 time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME)),
-                blockForm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BLOCKFORM))
+                blockForm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BLOCKFORM)),
+                interval = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_INTERVAL))
             ))
         }
         cursor.close()
@@ -104,7 +111,8 @@ class TaskRepository(context: Context) {
                 level = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LEVEL)),
                 category = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
                 time = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME)),
-                blockForm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BLOCKFORM))
+                blockForm = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_BLOCKFORM)),
+                interval = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_INTERVAL))
             ).also {
                 cursor.close()
                 db.close()

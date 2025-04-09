@@ -20,13 +20,13 @@ class ChooseActivity : AppCompatActivity() {
         val month = findViewById<Button>(R.id.button_month)
 
         day.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 0))
+            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 0).putExtra("INTERVAL", 0))
         }
         week.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 1))
+            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 1).putExtra("INTERVAL", 1))
         }
         month.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 2))
+            startActivity(Intent(this, MainActivity::class.java).putExtra("MODE", 2).putExtra("INTERVAL", 2))
         }
     }
 }

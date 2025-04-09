@@ -7,5 +7,6 @@ data class Task(
     val level: Int,
     val category: String,
     val time: String,
-    val blockForm: Int
+    val blockForm: Int,
+    val interval: Int
 )

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#303030"
+    android:background="#555555"
     android:backgroundTint="#555555"
     android:gravity="center_horizontal"
     android:orientation="vertical"
@@ -12,6 +12,7 @@
 
 
     <com.example.test_techonstrelka.customview.TetrisView
+
         android:id="@+id/tetrisView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -23,7 +24,10 @@
         app:layout_constraintBottom_toTopOf="@+id/imageButton3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageButton2" />
+        app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+        android:background="@android:color/transparent"
+        android:backgroundTint="#555555"
+        app:backgroundTint="#555555"/>
 
     <LinearLayout
         android:id="@+id/linearLayout2"

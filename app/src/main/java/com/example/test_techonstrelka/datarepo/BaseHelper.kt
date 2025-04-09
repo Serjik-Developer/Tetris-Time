@@ -11,7 +11,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
 
     companion object {
         private const val DATABASE_NAME = "Tasks.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         private const val TABLE_TASKS = "tasks"
         private const val COLUMN_ID = "id"
@@ -21,6 +21,7 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
         private const val COLUMN_CATEGORY = "category"
         private const val COLUMN_TIME = "time" //КОЛИЧЕСТВО 30 МИНУТ В ПЕРИОДЕ ВРЕМЕНИ(2 часа = 4)
         private const val COLUMN_BLOCKFORM = "blockform" // форма блока
+        private const val COLUMN_INTERVAL = "interval" // 0-> day 1-> week 2-> month
 
         private const val CREATE_TABLE_TASKS = """
             CREATE TABLE $TABLE_TASKS (
@@ -30,7 +31,8 @@ class SimpleDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABAS
                 $COLUMN_LEVEL INTEGER,
                 $COLUMN_CATEGORY TEXT,
                 $COLUMN_TIME TEXT, 
-                $COLUMN_BLOCKFORM INTEGER
+                $COLUMN_BLOCKFORM INTEGER,
+                $COLUMN_INTERVAL INTEGER
             )
         """
     }

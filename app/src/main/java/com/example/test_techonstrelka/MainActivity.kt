@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
+import android.media.Image
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
@@ -33,20 +34,22 @@ import com.example.test_techonstrelka.customview.TetrisView
 import com.example.test_techonstrelka.datarepo.TaskRepository
 import com.example.test_techonstrelka.models.ElementModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.text.ChoiceFormat
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
+    private var dialog: AlertDialog? = null
     private lateinit var tetrisView: TetrisView
     private lateinit var database: TaskRepository
     private var isAddDialogShowing = false
-
+    private var interval: Int = -1
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         database = TaskRepository(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         tetrisView = findViewById(R.id.tetrisView)
-
+        interval = intent.getIntExtra("INTERVAL", -1)
         val mode = intent.getIntExtra("MODE", -1)
         val (rows, columns) = when (mode) {
             0 -> Pair(20, 12)
@@ -61,14 +64,23 @@ class MainActivity : AppCompatActivity() {
                 showGameOverDialog(this)
             }
         }
-
+        val btnEsc = findViewById<ImageButton>(R.id.imageButton)
+        btnEsc.setOnClickListener {
+            startActivity(Intent(this, ChooseActivity::class.java))
+        }
 
         val btn = findViewById<ImageButton>(R.id.imageButton2)
-            val elements = database.getAllTasks().map {
+            val elements = database.getAllTasks(interval).map {
                 ElementModel(it.id, it.blockForm.toString())
             }
-            tetrisView.activeElements.addAll(elements)
-            tetrisView.startGame()
+            if (elements.size == 0) {
+                showAddDialog()
+            } else {
+                tetrisView.activeElements.addAll(elements)
+                tetrisView.startGame()
+
+            }
+
 
         tetrisView.setElementRequestListener {
             showAddDialog()
@@ -234,7 +246,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAddDialog() {
 
-        if (isAddDialogShowing) return
+        if (isAddDialogShowing || dialog?.isShowing == true) return // Добавляем проверку на isShowing
         try {
             isAddDialogShowing = true
             tetrisView.pauseGame()
@@ -306,7 +318,7 @@ class MainActivity : AppCompatActivity() {
                     val cathegory = catspinner.selectedItem.toString()
                     val id = UUID.randomUUID().toString()
                     if (name.isNotEmpty() && description.isNotEmpty() && hours.toString().isNotEmpty() && cathegory.isNotEmpty()) {
-                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
+                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform, interval)
                         val newElement = ElementModel(id, blockform.toString())
                         tetrisView.addNewElement(newElement)
                         if (tetrisView.isPaused) {
@@ -334,7 +346,7 @@ class MainActivity : AppCompatActivity() {
                         if (!tetrisView.isPaused){
                             tetrisView.pauseGame()
                         }
-                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
+                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform, interval)
                         val newElement = ElementModel(id, blockform.toString())
                         tetrisView.addNewElement(newElement)
                         dialogView.findViewById<EditText>(R.id.editTextText).text.clear()
@@ -342,7 +354,7 @@ class MainActivity : AppCompatActivity() {
                         dialogView.findViewById<SeekBar>(R.id.seekBar).progress = 0
                         isAddDialogShowing = false
 
-                        showAddDialog()
+
                     } else {
                         Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
                     }

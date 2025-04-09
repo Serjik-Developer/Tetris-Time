@@ -26,8 +26,8 @@ class TetrisView @JvmOverloads constructor(
     private val paint = Paint()
     private val cellSize: Float
         get() = minOf(
-            width.toFloat() / gridWidth,
-            height.toFloat() / gridHeight
+            (width - paddingStart - paddingEnd).toFloat() / gridWidth,
+            (height - paddingTop - paddingBottom).toFloat() / gridHeight
         )
     private var grid = Array(gridWidth) { IntArray(gridHeight) }
     private var elementGrid = Array(gridWidth) { Array<String?>(gridHeight) { null } }
@@ -437,12 +437,11 @@ class TetrisView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        paint.color = Color.parseColor("#333333")
-        paint.style = Paint.Style.FILL
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
         for (i in 0 until gridWidth) {
             for (j in 0 until gridHeight) {
-                paint.color = if (grid[i][j] != 0) grid[i][j] else Color.TRANSPARENT
+                // Заливка клетки
+                paint.color = if (grid[i][j] != 0) grid[i][j] else Color.parseColor("#333333")
                 paint.style = Paint.Style.FILL
                 canvas.drawRect(
                     i * cellSize,
@@ -452,6 +451,7 @@ class TetrisView @JvmOverloads constructor(
                     paint
                 )
 
+                // Границы клетки
                 paint.color = Color.DKGRAY
                 paint.style = Paint.Style.STROKE
                 paint.strokeWidth = 1f
@@ -464,7 +464,6 @@ class TetrisView @JvmOverloads constructor(
                 )
             }
         }
-
         // Draw current piece
         currentPiece?.let { piece ->
             for (i in 0 until piece.shape.size) {
@@ -499,22 +498,22 @@ class TetrisView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredWidth = (gridWidth * cellSize).toInt()
-        val desiredHeight = (gridHeight * cellSize).toInt()
+        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
+        val heightMode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
-        val width = when (MeasureSpec.getMode(widthMeasureSpec)) {
-            MeasureSpec.EXACTLY -> MeasureSpec.getSize(widthMeasureSpec)
-            MeasureSpec.AT_MOST -> minOf(desiredWidth, MeasureSpec.getSize(widthMeasureSpec))
-            else -> desiredWidth
-        }
+        val cellWidth = (widthSize - paddingStart - paddingEnd) / gridWidth
+        val cellHeight = (heightSize - paddingTop - paddingBottom) / gridHeight
+        val cellSize = minOf(cellWidth, cellHeight)
 
-        val height = when (MeasureSpec.getMode(heightMeasureSpec)) {
-            MeasureSpec.EXACTLY -> MeasureSpec.getSize(heightMeasureSpec)
-            MeasureSpec.AT_MOST -> minOf(desiredHeight, MeasureSpec.getSize(heightMeasureSpec))
-            else -> desiredHeight
-        }
+        val desiredWidth = (cellSize * gridWidth + paddingStart + paddingEnd).toInt()
+        val desiredHeight = (cellSize * gridHeight + paddingTop + paddingBottom).toInt()
 
-        setMeasuredDimension(width, height)
+        setMeasuredDimension(
+            resolveSize(desiredWidth, widthMeasureSpec),
+            resolveSize(desiredHeight, heightMeasureSpec)
+        )
     }
 
     fun onLeft() {
