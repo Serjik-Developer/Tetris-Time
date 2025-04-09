@@ -116,5 +116,8 @@ class TaskRepository(context: Context) {
         }
     }
 
-
+    fun deleteTask(id: String) {
+        val db = databaseHelper.writableDatabase
+        db.delete("tasks", "id = ?", arrayOf(id))
+    }
 }

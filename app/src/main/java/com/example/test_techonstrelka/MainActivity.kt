@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var startButton: Button
     private lateinit var scoreText: TextView
     private lateinit var database: TaskRepository
+    private var isAddDialogShowing = false
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +66,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Строка $lineNumber заполнена!", Toast.LENGTH_SHORT).show()
         }
         tetrisView.setOnElementClickListener { elementId ->
-            // Handle the element click here
             Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
             showInfoDialog(elementId)
 
@@ -109,6 +109,10 @@ class MainActivity : AppCompatActivity() {
                 .setView(infoText)
                 .setPositiveButton("Закрыть") { _, _ ->
                     tetrisView.resumeGame()
+                }.setNegativeButton("Удалить дело") { _, _ ->
+                    database.deleteTask(elementId)
+                    tetrisView.removeElement(elementId)
+                    tetrisView.resumeGame()
                 }
                 .setOnDismissListener {
                     tetrisView.resumeGame()
@@ -133,7 +137,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAddDialog() {
+
+        if (isAddDialogShowing) return
         try {
+            isAddDialogShowing = true
             tetrisView.pauseGame()
             val inputName = EditText(this).apply {
                 hint = "Введите название дела"
@@ -170,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                 hint = "Введите категорию"
             }
 
-            MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
+            val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
                 .setTitle("Создать дело")
                 .setView(LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
@@ -181,41 +188,83 @@ class MainActivity : AppCompatActivity() {
                     addView(inputLevel)
                     addView(inputCathegory)
                 })
-                .setPositiveButton("Сохранить и играть") { _, _ ->
+                .setPositiveButton("Сохранить и играть") { dialogInterface, _ ->
                     val name = inputName.text.toString()
                     val description = inputDesc.text.toString()
                     val hours = inputHours.text.toString()
                     val level = inputLevel.text.toString().toInt()
-                    val blockform = hours.toInt()
+                    val blockform = if (hours.isNotEmpty()) hours.toInt() else 0
                     val cathegory = inputCathegory.text.toString()
                     val id = UUID.randomUUID().toString()
-                    database.addTask(id, name, description, level, cathegory, hours, blockform)
-                    val newElement = ElementModel(id, blockform.toString())
-                    tetrisView.addNewElement(newElement)
-                    tetrisView.resumeGame()
 
+                    if (name.isNotEmpty() && description.isNotEmpty() && hours.isNotEmpty() && cathegory.isNotEmpty()) {
+                        database.addTask(id, name, description, level, cathegory, hours, blockform)
+                        val newElement = ElementModel(id, blockform.toString())
+                        tetrisView.addNewElement(newElement)
+                        if (tetrisView.isPaused) {
+                            tetrisView.resumeGame()
+                        }
+                        if (tetrisView.currentPiece == null) {
+                            tetrisView.spawnPiece()
+                            tetrisView.invalidate()
+                        }
+
+                        dialogInterface.dismiss()
+                    } else {
+                        Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 .setNegativeButton("Сохранять дальше") { _, _ ->
+
                     val name = inputName.text.toString()
                     val description = inputDesc.text.toString()
                     val hours = inputHours.text.toString()
                     val level = inputLevel.text.toString().toInt()
+                    val blockform = if (hours.isNotEmpty()) hours.toInt() else 0
                     val cathegory = inputCathegory.text.toString()
-                    val blockform = hours.toInt()
                     val id = UUID.randomUUID().toString()
-                    database.addTask(id, name, description, level, cathegory, hours, blockform)
-                    val newElement = ElementModel(id, blockform.toString())
-                    tetrisView.addNewElement(newElement)
-                    showAddDialog()
+
+                    if (name.isNotEmpty() && description.isNotEmpty() && hours.isNotEmpty() && cathegory.isNotEmpty()) {
+                        if (!tetrisView.isPaused){
+                            tetrisView.pauseGame()
+                        }
+                        database.addTask(id, name, description, level, cathegory, hours, blockform)
+                        val newElement = ElementModel(id, blockform.toString())
+                        tetrisView.addNewElement(newElement)
+                        inputName.text.clear()
+                        inputDesc.text.clear()
+                        inputHours.text.clear()
+                        inputLevel.text.clear()
+                        inputCathegory.text.clear()
+                        isAddDialogShowing = false
+
+                        showAddDialog()
+                    } else {
+                        Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                .show()
+                .setOnDismissListener {
+                    isAddDialogShowing = false
+                    tetrisView.resumeGame()
+                }
+                .create()
+
+            dialog.setOnShowListener {
+                inputName.text.clear()
+                inputDesc.text.clear()
+                inputHours.text.clear()
+                inputLevel.text.clear()
+                inputCathegory.text.clear()
+            }
+
+            dialog.show()
         } catch (e: Exception) {
+            isAddDialogShowing = false
             Toast.makeText(this, "Возникла ошибка!", Toast.LENGTH_LONG).show()
             Log.e("ERROR", e.toString())
+            tetrisView.resumeGame()
         }
-
     }
-    // Добавьте эти методы в класс MainActivity
     fun onLeftClick(view: View) {
         tetrisView.onLeft()
     }
