@@ -36,6 +36,7 @@ class CircularProgressView @JvmOverloads constructor(
 
 
 
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val padding = 40f

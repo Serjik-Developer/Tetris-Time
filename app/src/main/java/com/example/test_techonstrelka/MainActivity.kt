@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
@@ -25,6 +24,8 @@ import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tetrisView: TetrisView
+    private lateinit var startButton: Button
+    private lateinit var scoreText: TextView
     private lateinit var database: TaskRepository
     private var isAddDialogShowing = false
 
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         val mode = intent.getIntExtra("MODE", -1)
         val (rows, columns) = when (mode) {
-            0 -> Pair(20, 12)
+            0 -> Pair(10, 12)
             1 -> Pair(12, 7)
             2 -> Pair(6, 5)
             else -> Pair(20, 10)
@@ -45,13 +46,18 @@ class MainActivity : AppCompatActivity() {
 
         tetrisView.setGridSize(columns, rows)
 
-        val btn = findViewById<ImageButton>(R.id.imageButton2)
 
+        startButton = findViewById(R.id.startButton)
+        scoreText = findViewById(R.id.scoreText)
+        val btn = findViewById<Button>(R.id.addButton)
+        startButton.setOnClickListener {
             val elements = database.getAllTasks().map {
                 ElementModel(it.id, it.blockForm.toString())
             }
             tetrisView.activeElements.addAll(elements)
             tetrisView.startGame()
+            startButton.visibility = View.GONE
+        }
         tetrisView.setElementRequestListener {
             showAddDialog()
         }
