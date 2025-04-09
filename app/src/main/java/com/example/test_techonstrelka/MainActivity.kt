@@ -88,25 +88,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun showGameOverDialog(context: Context) {
         try {
-            val gameOverArray = arrayOf("Попробуйте еще раз!", "В следующий раз точно получится!", "Может быть потом повезет!").random()
+            val gameOverMessages = arrayOf(
+                "Попробуйте еще раз!",
+                "В следующий раз точно получится!",
+                "Может быть потом повезет!"
+            )
+            val randomMessage = gameOverMessages.random()
+
             tetrisView.pauseGame()
-            val congl = TextView(this).apply {
-                textSize = 16f
-                text = gameOverArray
+
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.game_over_dialog, null).apply {
+                findViewById<TextView>(R.id.gameOverMessage).text = randomMessage
             }
-            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
-                .setTitle("Вы проиграли!")
-                .setView(congl)
-                .setPositiveButton("Закрыть") { _, _ ->
-                    startActivity(Intent(this, ChooseActivity::class.java))
-                }
+
+            val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
+                .setView(dialogView)
                 .setOnDismissListener {
                     tetrisView.resumeGame()
                     startActivity(Intent(this, ChooseActivity::class.java))
                 }
-            dialogBuilder.show()
-        } catch (e: Exception) {
+                .create()
 
+            dialogView.findViewById<Button>(R.id.closeButton).setOnClickListener {
+                dialog.dismiss()
+                startActivity(Intent(this, ChooseActivity::class.java))
+            }
+
+            dialog.window?.apply {
+                setBackgroundDrawableResource(android.R.color.transparent)
+            }
+
+            dialog.show()
+
+        } catch (e: Exception) {
+            Log.e("GameOverDialog", "Error: ${e.message}")
+            startActivity(Intent(this, ChooseActivity::class.java))
         }
     }
 
