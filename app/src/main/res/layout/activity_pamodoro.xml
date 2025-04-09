@@ -8,6 +8,7 @@
     android:background="#121212"
     tools:context=".PomodoroActivity">
 
+
     <!-- Круглый прогресс-бар -->
     <FrameLayout
         android:layout_width="280dp"
@@ -23,19 +24,23 @@
             android:layout_height="match_parent"
             android:src="@drawable/circle_background"/>
 
-        <!-- Прогресс -->
-        <ImageView
+        <com.example.test_techonstrelka.customview.CircularProgressView
             android:id="@+id/progressView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/circle_progress"/>
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
 
         <!-- Центральная часть с текстом -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/timerText"
@@ -44,7 +49,7 @@
                 android:text="25:00"
                 android:textColor="#FFFFFF"
                 android:textSize="56sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/statusText"
@@ -53,7 +58,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Рабочий режим"
                 android:textColor="#4CAF50"
-                android:textSize="16sp"/>
+                android:textSize="16sp" />
         </LinearLayout>
     </FrameLayout>
 
@@ -161,7 +166,7 @@
         android:id="@+id/startButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="268dp"
+        android:layout_marginTop="272dp"
         android:layout_weight="1"
         android:backgroundTint="#4CAF50"
         android:text="Старт"
