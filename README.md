@@ -1,5 +1,5 @@
 ## Tetris Time Project
-[![Development team](https://img.shields.io/badge/Developed%20by-CuteCode-%2a32bd6)](https://github.com/CuteCode-tehnostrelka52-ru)
+[![Development team](https://img.shields.io/badge/Developed%20by-CuteCode-%23a32bd6)](https://github.com/CuteCode-tehnostrelka52-ru)
 [![Android SDK version](https://img.shields.io/badge/Android%20SDK-v29-%236DB33F)]()
 <br/>
 [![Build system](https://img.shields.io/badge/Build%20System-Gradle-%2313a7cd)](https://gradle.org)
