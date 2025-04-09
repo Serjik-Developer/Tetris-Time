@@ -87,6 +87,7 @@ class PomodoroActivity : AppCompatActivity() {
         val progress = 1f - (millisLeft.toFloat() / totalTime.toFloat())
         progressView.setProgress(progress)
 
+
         val hue = if (isWorkTime) {
             120f * (millisLeft.toFloat() / totalTime.toFloat())
         } else {

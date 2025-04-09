@@ -33,6 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent" />
 
 
+
         <!-- Центральная часть с текстом -->
         <LinearLayout
             android:layout_width="match_parent"
