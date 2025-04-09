@@ -1,6 +1,7 @@
 package com.example.test_techonstrelka
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         tetrisView.setGridSize(columns, rows)
         tetrisView.setGameOverListener {
             runOnUiThread {
-                Toast.makeText(this, "Вы проиграли!", Toast.LENGTH_LONG).show()
+                showGameOverDialog(this)
             }
         }
 
@@ -71,6 +72,30 @@ class MainActivity : AppCompatActivity() {
         tetrisView.setOnElementClickListener { elementId ->
             Toast.makeText(this, "Clicked element ID: $elementId", Toast.LENGTH_SHORT).show()
             showInfoDialog(elementId)
+
+        }
+    }
+
+    private fun showGameOverDialog(context: Context) {
+        try {
+            val gameOverArray = arrayOf("Попробуйте еще раз!", "В следующий раз точно получится!", "Может быть потом повезет!").random()
+            tetrisView.pauseGame()
+            val congl = TextView(this).apply {
+                textSize = 16f
+                text = gameOverArray
+            }
+            val dialogBuilder = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
+                .setTitle("Вы проиграли!")
+                .setView(congl)
+                .setPositiveButton("Закрыть") { _, _ ->
+                    startActivity(Intent(this, ChooseActivity::class.java))
+                }
+                .setOnDismissListener {
+                    tetrisView.resumeGame()
+                    startActivity(Intent(this, ChooseActivity::class.java))
+                }
+            dialogBuilder.show()
+        } catch (e: Exception) {
 
         }
     }
