@@ -33,7 +33,7 @@ class TetrisView @JvmOverloads constructor(
     private var elementGrid = Array(gridWidth) { Array<String?>(gridHeight) { null } }
     var currentPiece: Piece? = null
     private val handler = Handler(Looper.getMainLooper())
-    private val updateDelay = 500L
+    private val updateDelay = 1000L
     var isPaused = false
     val activeElements = mutableListOf<ElementModel>()
     private val placedElements = mutableListOf<ElementModel>()
@@ -144,7 +144,20 @@ class TetrisView @JvmOverloads constructor(
                 }
             }
 
-            return Piece(newShape, color, elementId)
+            // После поворота нужно проверить, не выходит ли фигура за границы
+            val rotatedPiece = Piece(newShape, color, elementId)
+            rotatedPiece.x = this.x
+            rotatedPiece.y = this.y
+
+            // Корректировка позиции, если фигура выходит за границы
+            if (rotatedPiece.x + rotatedPiece.shape.size > gridWidth) {
+                rotatedPiece.x = gridWidth - rotatedPiece.shape.size
+            }
+            if (rotatedPiece.x < 0) {
+                rotatedPiece.x = 0
+            }
+
+            return rotatedPiece
         }
     }
 
@@ -175,12 +188,14 @@ class TetrisView @JvmOverloads constructor(
 
     private val updateRunnable = object : Runnable {
         override fun run() {
-            if (!isPaused && currentPiece != null && !moveDown()) {
-                placePiece()
-                spawnPiece()
-                if (isGameOver()) {
-                    handler.removeCallbacks(this)
-                    return
+            if (!isPaused && currentPiece != null) {
+                if (!moveDown()) {
+                    placePiece()
+                    spawnPiece()
+                    if (isGameOver()) {
+                        handler.removeCallbacks(this)
+                        return
+                    }
                 }
             }
             invalidate()
@@ -316,7 +331,6 @@ class TetrisView @JvmOverloads constructor(
                 if (shape[i][j] == 1) {
                     val newX = x + i
                     val newY = y + j
-
                     if (newX < 0 || newX >= gridWidth || newY >= gridHeight) {
                         return false
                     }
@@ -334,10 +348,17 @@ class TetrisView @JvmOverloads constructor(
         val piece = currentPiece ?: return false
         val rotated = piece.rotate()
 
-        if (isValidPosition(rotated.shape, piece.x, piece.y)) {
-            currentPiece = rotated
-            return true
+        // Проверяем все возможные смещения, если поворот невозможен в текущей позиции
+        val offsets = arrayOf(0, 1, -1, 2, -2) // Проверяем текущую позицию и смещения влево/вправо
+
+        for (offset in offsets) {
+            rotated.x = piece.x + offset
+            if (isValidPosition(rotated.shape, rotated.x, rotated.y)) {
+                currentPiece = rotated
+                return true
+            }
         }
+
         return false
     }
 
@@ -413,11 +434,12 @@ class TetrisView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        // Draw grid
+        paint.color = Color.parseColor("#333333")
+        paint.style = Paint.Style.FILL
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
         for (i in 0 until gridWidth) {
             for (j in 0 until gridHeight) {
-                paint.color = if (grid[i][j] != 0) grid[i][j] else Color.LTGRAY
+                paint.color = if (grid[i][j] != 0) grid[i][j] else Color.TRANSPARENT
                 paint.style = Paint.Style.FILL
                 canvas.drawRect(
                     i * cellSize,
@@ -503,13 +525,14 @@ class TetrisView @JvmOverloads constructor(
     }
 
     fun onRotate() {
-        rotatePiece()
-        invalidate()
+        if (rotatePiece()) {
+            invalidate()
+        }
     }
 
     fun onDrop() {
         while (moveDown()) {
-            // Keep moving down until it can't anymore
+
         }
         invalidate()
     }
