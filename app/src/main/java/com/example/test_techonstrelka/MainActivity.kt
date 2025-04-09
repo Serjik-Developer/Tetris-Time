@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
 
         } catch (e: Exception) {
-            Log.e("GameOverDialog", "Error: ${e.message}")
+            Log.e("MAIN-ERROR", "Error: ${e.message}")
             startActivity(Intent(this, ChooseActivity::class.java))
         }
     }
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             tetrisView.resumeGame()
-            Log.e("CongratDialog", "Error: ${e.message}")
+            Log.e("MAIN-ERROR", "Error: ${e.message}")
         }
     }
     @SuppressLint("SetTextI18n")
@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             Toast.makeText(this, "Ошибка при отображении информации", Toast.LENGTH_SHORT).show()
-            Log.e("INFO_DIALOG", "Error: ${e.message}")
+            Log.e("MAIN-ERROR", "Error: ${e.message}")
             tetrisView.resumeGame()
         }
     }
@@ -360,14 +360,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 btnDelete.setOnClickListener {
-
+                    dialog.dismiss()
                 }
             }
             dialog.show()
         } catch (e: Exception) {
             isAddDialogShowing = false
             Toast.makeText(this, "Возникла ошибка!", Toast.LENGTH_LONG).show()
-            Log.e("ERROR", e.toString())
+            Log.e("MAIN-ERROR", e.toString())
             tetrisView.resumeGame()
         }
     }
