@@ -193,15 +193,19 @@ class MainActivity : AppCompatActivity() {
             val infoTextView = dialogView.findViewById<TextView>(R.id.infoText)
             val closeButton = dialogView.findViewById<Button>(R.id.buttonClose)
             val deleteButton = dialogView.findViewById<Button>(R.id.buttonDelete)
-            val timerButton = dialogView.findViewById<Button>(R.id.buttonTimer)
-
+            deleteButton.text = "Сделано!"
+            var levelToText = ""
+            when (element.level) {
+                1 -> levelToText = "Обычное дело"
+                2 -> levelToText = "Важное дело"
+            }
             when (interval) {
                 0 -> {
                     val time = element.time.toDouble()/2
                     infoTextView.text = """
             Название: ${element.name}
             Описание: ${element.description}
-            Уровень важности: ${element.level}
+            Уровень важности: ${levelToText}
             Категория: ${element.category}
             Время выполнения: ${time} часов
             """.trimIndent()
@@ -212,7 +216,7 @@ class MainActivity : AppCompatActivity() {
                     infoTextView.text = """
             Название: ${element.name}
             Описание: ${element.description}
-            Уровень важности: ${element.level}
+            Уровень важности: ${levelToText}
             Категория: ${element.category}
             Время выполнения: ${time} часов
             """.trimIndent()
@@ -222,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                     infoTextView.text = """
             Название: ${element.name}
             Описание: ${element.description}
-            Уровень важности: ${element.level}
+            Уровень важности: ${levelToText}
             Категория: ${element.category}
             Время выполнения: ${time} суток
             """.trimIndent()
@@ -238,20 +242,23 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
 
-            deleteButton.setOnClickListener {
-                database.deleteTask(elementId)
-                tetrisView.removeElement(elementId)
-                tetrisView.resumeGame()
-                dialog.dismiss()
-            }
+
 
             if (element.level == 2) {
-                timerButton.visibility = View.VISIBLE
-                timerButton.setOnClickListener {
+                deleteButton.text = "Pomodoro"
+                deleteButton.setOnClickListener {
                     val intent = Intent(this, PomodoroActivity::class.java)
                     if (interval==0) intent.putExtra("IsDay", true)
                     intent.putExtra("name", elementId)
                     startActivity(intent)
+                    dialog.dismiss()
+                }
+            }
+            else {
+                deleteButton.setOnClickListener {
+                    database.deleteTask(elementId)
+                    tetrisView.removeElement(elementId)
+                    tetrisView.resumeGame()
                     dialog.dismiss()
                 }
             }
