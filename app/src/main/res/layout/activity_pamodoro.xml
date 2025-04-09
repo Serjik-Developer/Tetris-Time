@@ -6,15 +6,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
+    android:backgroundTint="#555555"
     tools:context=".PomodoroActivity">
 
-
+    <!-- Кнопка назад -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:src="@drawable/back"
+        android:tint="#333333"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Круглый прогресс-бар -->
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="280dp"
         android:layout_height="280dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="90dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,25 +37,31 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/circle_background"/>
+            android:src="@drawable/circle_background" />
 
         <com.example.test_techonstrelka.customview.CircularProgressView
             android:id="@+id/progressView"
             android:layout_width="280dp"
             android:layout_height="280dp"
             android:layout_gravity="center"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
-
-
-        <!-- Центральная часть с текстом -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/taskTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Время задачи: "
+                android:textColor="#fefefe"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/timerText"
@@ -54,83 +74,15 @@
 
             <TextView
                 android:id="@+id/statusText"
+                style="@style/CardView.Dark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Рабочий режим"
-                android:textColor="#4CAF50"
+                android:text="Работа"
+                android:textColor="#fefefe"
                 android:textSize="16sp" />
         </LinearLayout>
     </FrameLayout>
-
-    <!-- Название проблемы -->
-
-    <!-- Описание проблемы -->
-
-    <TextView
-        android:id="@+id/problemTitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="52dp"
-        android:layout_marginEnd="32dp"
-        android:text="Проблема:"
-        android:textColor="#4CAF50"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progressView" />
-
-    <TextView
-        android:id="@+id/problemDescriptionText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        android:contentDescription="@string/app_name"
-        android:text=" "
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/problemTitleText" />
-
-    <!-- Название задачи -->
-    <TextView
-        android:id="@+id/taskTitleText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="32dp"
-        android:text="Текущая задача:"
-        android:textColor="#4CAF50"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/problemDescriptionText"/>
-
-    <!-- Описание задачи -->
-    <TextView
-        android:id="@+id/taskDescriptionText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        android:contentDescription="@string/app_name"
-        android:text=" "
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/taskTitleText" />
-
-    <!-- Панель управления -->
 
     <LinearLayout
         android:id="@+id/controlsLayout"
@@ -147,43 +99,53 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/taskDescriptionText"
         app:layout_constraintVertical_bias="0.366">
 
     </LinearLayout>
 
     <Button
         android:id="@+id/resetButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="110dp"
+        android:layout_height="65dp"
+        android:layout_marginBottom="56dp"
         android:layout_weight="1"
-        android:backgroundTint="#4CAF50"
+        android:backgroundTint="#770101"
         android:text="Сброс"
         android:textColor="#FFFFFF"
-        tools:layout_editor_absoluteX="27dp"
-        tools:layout_editor_absoluteY="652dp" />
-
-    <Button
-        android:id="@+id/startButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="272dp"
-        android:layout_weight="1"
-        android:backgroundTint="#4CAF50"
-        android:text="Старт"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@+id/controlsLayout"
-        tools:layout_editor_absoluteX="161dp" />
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/skipButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="20dp"
         android:layout_weight="1"
-        android:backgroundTint="#4CAF50"
+        android:backgroundTint="#333333"
         android:text="Готово"
         android:textColor="#FFFFFF"
-        tools:layout_editor_absoluteX="269dp"
-        tools:layout_editor_absoluteY="628dp" />
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/resetButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/resetButton" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="120dp"
+        android:layout_height="65dp"
+        android:layout_marginStart="20dp"
+        android:layout_weight="1"
+        android:backgroundTint="#333333"
+        android:text="Старт"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/resetButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/resetButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
