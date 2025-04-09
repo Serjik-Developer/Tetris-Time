@@ -8,40 +8,46 @@
     android:background="#121212"
     tools:context=".PomodoroActivity">
 
-    <!-- Круглый прогресс-бар -->
     <FrameLayout
         android:layout_width="280dp"
         android:layout_height="280dp"
-        android:layout_marginTop="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Фоновый круг -->
+        <!-- Фоновый полный круг -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/circle_background"/>
 
-        <!-- Прогресс -->
+        <!-- Статическая верхняя часть -->
         <ImageView
-            android:id="@+id/progressView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/circle_progress"/>
+            android:src="@drawable/circle_static_top"
+            android:rotation="-90"/>
+
+        <com.example.test_techonstrelka.customview.CircularProgressView
+            android:id="@+id/progressView"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
 
         <!-- Центральная часть с текстом -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center">
-
+            android:gravity="center"
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/timerText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="25:00"
+                android:text="24:00"
                 android:textColor="#FFFFFF"
                 android:textSize="56sp"
                 android:textStyle="bold"/>
@@ -51,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Рабочий режим"
+                android:text="Работа"
                 android:textColor="#4CAF50"
                 android:textSize="16sp"/>
         </LinearLayout>

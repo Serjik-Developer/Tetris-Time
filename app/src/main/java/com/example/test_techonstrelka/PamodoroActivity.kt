@@ -2,6 +2,7 @@ package com.example.test_techonstrelka
 
 import android.animation.ValueAnimator
 import android.graphics.Color
+import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RotateDrawable
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -9,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.test_techonstrelka.customview.CircularProgressView
 import com.example.test_techonstrelka.datarepo.TaskRepository
 
 class PomodoroActivity : AppCompatActivity() {
@@ -23,7 +25,7 @@ class PomodoroActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var resetButton: Button
     private lateinit var skipButton: Button
-    private lateinit var progressView: ImageView
+    private lateinit var progressView: CircularProgressView
     private lateinit var progressDrawable: RotateDrawable
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +39,6 @@ class PomodoroActivity : AppCompatActivity() {
         skipButton = findViewById(R.id.skipButton)
         progressView = findViewById(R.id.progressView)
 
-        progressDrawable = progressView.drawable as RotateDrawable
-        progressDrawable.level = 0
 
         val repoTask = TaskRepository(this)
         val id = intent.getStringExtra("name")
@@ -84,20 +84,16 @@ class PomodoroActivity : AppCompatActivity() {
     }
 
     private fun updateProgress(millisLeft: Long, totalTime: Long) {
-        val progress = (millisLeft.toFloat() / totalTime.toFloat() * 10000).toInt()
-        progressDrawable.level = progress
+        val progress = 1f - (millisLeft.toFloat() / totalTime.toFloat())
+        progressView.setProgress(progress)
+
         val hue = if (isWorkTime) {
-            120f * (1 - millisLeft.toFloat() / totalTime.toFloat())
+            120f * (millisLeft.toFloat() / totalTime.toFloat())
         } else {
-            240f - (120f * (1 - millisLeft.toFloat() / totalTime.toFloat()))
+            240f - (120f * (millisLeft.toFloat() / totalTime.toFloat()))
         }
         val color = Color.HSVToColor(floatArrayOf(hue, 1f, 1f))
-        val animator = ValueAnimator.ofArgb(statusText.currentTextColor, color)
-        animator.duration = 300
-        animator.addUpdateListener { animator ->
-            statusText.setTextColor(animator.animatedValue as Int)
-        }
-        animator.start()
+        statusText.setTextColor(color)
     }
 
     private fun updateTimerText(millisUntilFinished: Long) {
