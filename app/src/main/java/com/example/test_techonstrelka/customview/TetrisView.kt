@@ -95,9 +95,34 @@ class TetrisView @JvmOverloads constructor(
             5 -> arrayOf(intArrayOf(0, 1, 1), intArrayOf(1, 1, 0)) // S
             6 -> arrayOf(intArrayOf(1, 0, 0), intArrayOf(1, 1, 1)) // L
             7 -> arrayOf(intArrayOf(0, 0, 1), intArrayOf(1, 1, 1)) // J
+            8 -> arrayOf( // "Пушка" (крест с хвостиком)
+                intArrayOf(0, 1, 0),
+                intArrayOf(1, 1, 1),
+                intArrayOf(0, 1, 0)
+            )
+            9 -> arrayOf( // "Точка с крыльями"
+                intArrayOf(0, 1, 0),
+                intArrayOf(1, 1, 1),
+                intArrayOf(1, 0, 1)
+            )
+            10 -> arrayOf( // "Шаг"
+                intArrayOf(1, 0, 0),
+                intArrayOf(1, 1, 0),
+                intArrayOf(0, 1, 1)
+            )
+            11 -> arrayOf( // "U"
+                intArrayOf(1, 0, 1),
+                intArrayOf(1, 1, 1)
+            )
+            12 -> arrayOf( // "Большой угол"
+                intArrayOf(1, 0),
+                intArrayOf(1, 0),
+                intArrayOf(1, 1)
+            )
             else -> arrayOf()
         }
     }
+
 
     private val colors = arrayOf(
         Color.CYAN, Color.YELLOW, Color.MAGENTA,

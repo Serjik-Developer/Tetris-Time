@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -90,7 +92,7 @@ class MainActivity : AppCompatActivity() {
             Описание: ${element.description}
             Уровень важности: ${element.level}
             Категория: ${element.category}
-            Время выполнения: ${element.time} часов
+            Время выполнения: ${element.time } часов
             Форма блока: ${when(element.blockForm) {
                     1 -> "I"
                     2 -> "O"
@@ -119,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
 
-            if (element.level == 2) { //ВРЕМЕНО ДОБАВЛЕН УРОВЕНЬ ВАЖНОСТИ 2, ПОЗЖЕ БУДЕТ ОБСУЖДАТЬСЯ КОНКРЕТНЫЙ
+            if (element.level == 2) {
                 dialogBuilder.setNeutralButton("Таймер") { _, _ ->
                     val intent = Intent(this, PomodoroActivity::class.java).apply {
                         putExtra("name", elementId)
@@ -149,32 +151,39 @@ class MainActivity : AppCompatActivity() {
             val inputDesc = EditText(this).apply {
                 hint = "Введите описание дела"
             }
-            val inputHours = EditText(this).apply {
-                hint = "Введите количество часов"
-                inputType = InputType.TYPE_CLASS_NUMBER
-                filters = arrayOf(InputFilter.LengthFilter(3))
+            val inputHours = SeekBar(this).apply {
+                max = 11
+                progress = 0
             }
-            val inputLevel = EditText(this).apply {
-                hint = "Введите уровень важности"
-                inputType = InputType.TYPE_CLASS_NUMBER
-                filters = arrayOf(
-                    InputFilter.LengthFilter(1),
-                    InputFilter { source, start, end, dest, dstart, dend ->
-                        if (source.isNotEmpty()) {
-                            val newValue = source.toString().toIntOrNull()
-                            if (newValue != null && newValue in 1..2) {
-                                null
-                            } else {
-                                ""
-                            }
-                        } else {
-                            null
-                        }
-                    }
+            val seekBarValueText = TextView(this).apply {
+                text = "Выбрано часов: ${inputHours.progress}"
+                textSize = 16f
+                setPadding(0, 10, 0, 10)
+            }
+            seekBarValueText.text = "Выбрано часов: 1"
+            inputHours.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                    seekBarValueText.text = "Выбрано часов: ${progress+1}"
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
+            val importanceOptions = arrayOf("Обычная задача", "Важная задача")
+            val importanceSpinner = android.widget.Spinner(this).apply {
+                adapter = android.widget.ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    importanceOptions
                 )
             }
-            val inputCathegory = EditText(this).apply {
-                hint = "Введите категорию"
+            val cathegoryOptions = arrayOf("Работа", "Учеба", "Личные дела")
+            val cathegorySpinner = android.widget.Spinner(this).apply {
+                adapter = android.widget.ArrayAdapter(
+                    this@MainActivity,
+                    android.R.layout.simple_spinner_dropdown_item,
+                    cathegoryOptions
+                )
             }
 
             val dialog = MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_Rounded)
@@ -185,20 +194,22 @@ class MainActivity : AppCompatActivity() {
                     addView(inputName)
                     addView(inputDesc)
                     addView(inputHours)
-                    addView(inputLevel)
-                    addView(inputCathegory)
+                    addView(importanceSpinner)
+                    addView(cathegorySpinner)
+                    addView(seekBarValueText)
                 })
                 .setPositiveButton("Сохранить и играть") { dialogInterface, _ ->
                     val name = inputName.text.toString()
                     val description = inputDesc.text.toString()
-                    val hours = inputHours.text.toString()
-                    val level = inputLevel.text.toString().toInt()
-                    val blockform = if (hours.isNotEmpty()) hours.toInt() else 0
-                    val cathegory = inputCathegory.text.toString()
+                    val hours = inputHours.progress + 1
+
+                    val level = if (importanceSpinner.selectedItemPosition == 0) 1 else 2
+                    val blockform = hours
+                    val cathegory = cathegorySpinner.selectedItem.toString()
                     val id = UUID.randomUUID().toString()
 
-                    if (name.isNotEmpty() && description.isNotEmpty() && hours.isNotEmpty() && cathegory.isNotEmpty()) {
-                        database.addTask(id, name, description, level, cathegory, hours, blockform)
+                    if (name.isNotEmpty() && description.isNotEmpty() && hours.toString().isNotEmpty() && cathegory.isNotEmpty()) {
+                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
                         val newElement = ElementModel(id, blockform.toString())
                         tetrisView.addNewElement(newElement)
                         if (tetrisView.isPaused) {
@@ -218,24 +229,23 @@ class MainActivity : AppCompatActivity() {
 
                     val name = inputName.text.toString()
                     val description = inputDesc.text.toString()
-                    val hours = inputHours.text.toString()
-                    val level = inputLevel.text.toString().toInt()
-                    val blockform = if (hours.isNotEmpty()) hours.toInt() else 0
-                    val cathegory = inputCathegory.text.toString()
+                    val hours = inputHours.progress + 1
+
+                    val level = if (importanceSpinner.selectedItemPosition == 0) 1 else 2
+                    val blockform = hours
+                    val cathegory = cathegorySpinner.selectedItem.toString()
                     val id = UUID.randomUUID().toString()
 
-                    if (name.isNotEmpty() && description.isNotEmpty() && hours.isNotEmpty() && cathegory.isNotEmpty()) {
+                    if (name.isNotEmpty() && description.isNotEmpty() && hours.toString().isNotEmpty() && cathegory.isNotEmpty()) {
                         if (!tetrisView.isPaused){
                             tetrisView.pauseGame()
                         }
-                        database.addTask(id, name, description, level, cathegory, hours, blockform)
+                        database.addTask(id, name, description, level, cathegory, hours.toString(), blockform)
                         val newElement = ElementModel(id, blockform.toString())
                         tetrisView.addNewElement(newElement)
                         inputName.text.clear()
                         inputDesc.text.clear()
-                        inputHours.text.clear()
-                        inputLevel.text.clear()
-                        inputCathegory.text.clear()
+                        inputHours.progress = 0
                         isAddDialogShowing = false
 
                         showAddDialog()
@@ -252,9 +262,7 @@ class MainActivity : AppCompatActivity() {
             dialog.setOnShowListener {
                 inputName.text.clear()
                 inputDesc.text.clear()
-                inputHours.text.clear()
-                inputLevel.text.clear()
-                inputCathegory.text.clear()
+                inputHours.progress = 0
             }
 
             dialog.show()
