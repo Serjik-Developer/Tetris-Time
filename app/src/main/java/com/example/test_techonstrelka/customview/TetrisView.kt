@@ -20,7 +20,8 @@ class TetrisView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-
+    private val elementBlockForms = mutableMapOf<String, Int>()
+    private val elementColors = mutableMapOf<String, Int>()
     private var gridWidth: Int = 10
     private var gridHeight: Int = 20
     private val paint = Paint()
@@ -82,29 +83,70 @@ class TetrisView @JvmOverloads constructor(
         }
     }
     private fun applyGravity() {
-        for (i in 0 until gridWidth) {
-            val columnElements = mutableListOf<Pair<Int, String>>()
-            val columnColors = mutableListOf<Int>()
+        val elementIds = elementGrid.flatten().filterNotNull().toSet().toList()
 
-            for (j in 0 until gridHeight) {
-                if (grid[i][j] != 0 && elementGrid[i][j] != null) {
-                    columnElements.add(Pair(j, elementGrid[i][j]!!))
-                    columnColors.add(grid[i][j])
+        val elementsWithMinY = elementIds.map { id ->
+            val positions = mutableListOf<Pair<Int, Int>>()
+            for (x in 0 until gridWidth) {
+                for (y in 0 until gridHeight) {
+                    if (elementGrid[x][y] == id) {
+                        positions.add(Pair(x, y))
+                    }
                 }
             }
-            for (j in 0 until gridHeight) {
-                grid[i][j] = 0
-                elementGrid[i][j] = null
+            val minY = positions.minByOrNull { it.second }?.second ?: 0
+            id to minY
+        }.sortedBy { it.second }
+
+        for ((elementId, _) in elementsWithMinY) {
+            val blockForm = elementBlockForms[elementId] ?: continue
+            val shape = getPiece(blockForm)
+            val color = elementColors[elementId] ?: continue
+
+            val positions = mutableListOf<Pair<Int, Int>>()
+            for (x in 0 until gridWidth) {
+                for (y in 0 until gridHeight) {
+                    if (elementGrid[x][y] == elementId) {
+                        positions.add(Pair(x, y))
+                    }
+                }
             }
-            for ((index, pair) in columnElements.withIndex()) {
-                val newJ = gridHeight - columnElements.size + index
-                if (newJ >= 0) {
-                    grid[i][newJ] = columnColors[index]
-                    elementGrid[i][newJ] = pair.second
+            if (positions.isEmpty()) continue
+
+            val minX = positions.minByOrNull { it.first }?.first ?: 0
+            val minYCurrent = positions.minByOrNull { it.second }?.second ?: 0
+
+            positions.forEach { (x, y) ->
+                grid[x][y] = 0
+                elementGrid[x][y] = null
+            }
+
+            var newY = minYCurrent
+            var maxPossibleY = minYCurrent
+            while (newY < gridHeight) {
+                if (isValidPositionForShape(shape, minX, newY)) {
+                    maxPossibleY = newY
+                    newY++
+                } else {
+                    break
+                }
+            }
+
+            for (i in 0 until shape.size) {
+                for (j in 0 until shape[i].size) {
+                    if (shape[i][j] == 1) {
+                        val xPos = minX + i
+                        val yPos = maxPossibleY + j
+                        if (xPos < gridWidth && yPos < gridHeight && grid[xPos][yPos] == 0) {
+                            grid[xPos][yPos] = color
+                            elementGrid[xPos][yPos] = elementId
+                        }
+                    }
                 }
             }
         }
     }
+
 
     private fun getPiece(blockForm: Int): Array<IntArray> {
         return when (blockForm) {
@@ -267,6 +309,8 @@ class TetrisView @JvmOverloads constructor(
     private fun placePiece() {
         val piece = currentPiece ?: return
         val element = currentElement ?: return
+        elementBlockForms[element.id] = element.blockForm.toInt()
+        elementColors[element.id] = piece.color
 
         for (i in 0 until piece.shape.size) {
             for (j in 0 until piece.shape[0].size) {
@@ -357,6 +401,19 @@ class TetrisView @JvmOverloads constructor(
                     if (newY >= 0 && grid[newX][newY] != 0) {
                         return false
                     }
+                }
+            }
+        }
+        return true
+    }
+    private fun isValidPositionForShape(shape: Array<IntArray>, x: Int, y: Int): Boolean {
+        for (i in 0 until shape.size) {
+            for (j in 0 until shape[i].size) {
+                if (shape[i][j] == 1) {
+                    val newX = x + i
+                    val newY = y + j
+                    if (newX >= gridWidth || newY >= gridHeight) return false
+                    if (newY >= 0 && grid[newX][newY] != 0) return false
                 }
             }
         }
