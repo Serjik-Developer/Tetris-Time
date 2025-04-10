@@ -9,3 +9,5 @@
 [![AB](https://img.shields.io/badge/Andrey%20Belyakov%20-%23b50707)](https://github.com/insidethehearts)
 [![AK](https://img.shields.io/badge/Aleksandr%20Komarov%20-%23b50707)](https://github.com/KESHAIT)
 [![AP](https://img.shields.io/badge/Artem%20Potapov%20-%23b50707)](https://github.com/Artem-tes)
+#### 📜License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
