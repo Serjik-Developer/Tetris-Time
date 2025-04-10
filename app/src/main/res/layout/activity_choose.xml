@@ -17,6 +17,21 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp" />
 
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="3dp"
+        android:layout_marginLeft="10dp"
+        android:rotation="90"
+        android:rotationX="0"
+        android:rotationY="180"
+        android:src="@drawable/tetnize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/button_day"
         android:layout_width="0dp"
