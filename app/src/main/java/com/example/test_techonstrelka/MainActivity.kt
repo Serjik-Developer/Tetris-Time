@@ -195,6 +195,7 @@ class MainActivity : AppCompatActivity() {
             val infoTextView = dialogView.findViewById<TextView>(R.id.infoText)
             val closeButton = dialogView.findViewById<Button>(R.id.buttonClose)
             val deleteButton = dialogView.findViewById<Button>(R.id.buttonDelete)
+            val bigBtn = dialogView.findViewById<Button>(R.id.buttonBig)
             deleteButton.text = "Сделано!"
             var levelToText = ""
             when (element.level) {
@@ -203,6 +204,7 @@ class MainActivity : AppCompatActivity() {
             }
             when (interval) {
                 0 -> {
+                    bigBtn.visibility = View.GONE
                     val time = element.time.toDouble()/2
                     infoTextView.text = """
             Название: ${element.name}
@@ -214,6 +216,7 @@ class MainActivity : AppCompatActivity() {
 
                 }
                 1 -> {
+                    bigBtn.visibility = View.VISIBLE
                     val time = element.time.toDouble()*2
                     infoTextView.text = """
             Название: ${element.name}
@@ -222,8 +225,10 @@ class MainActivity : AppCompatActivity() {
             Категория: ${element.category}
             Время выполнения: ${time} часов
             """.trimIndent()
+
                 }
                 2 -> {
+                    bigBtn.visibility = View.VISIBLE
                     val time = element.time.toString()
                     infoTextView.text = """
             Название: ${element.name}
@@ -255,8 +260,15 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                     dialog.dismiss()
                 }
+                bigBtn.setOnClickListener {
+                    database.deleteTask(elementId)
+                    tetrisView.removeElement(elementId)
+                    tetrisView.resumeGame()
+                    dialog.dismiss()
+                }
             }
             else {
+                bigBtn.visibility = View.GONE
                 deleteButton.setOnClickListener {
                     database.deleteTask(elementId)
                     tetrisView.removeElement(elementId)
@@ -272,7 +284,6 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка при отображении информации", Toast.LENGTH_SHORT).show()
             Log.e("MAIN-ERROR", "Error: ${e.message}")
             tetrisView.resumeGame()
         }
@@ -435,7 +446,6 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         } catch (e: Exception) {
             isAddDialogShowing = false
-            Toast.makeText(this, "Возникла ошибка!", Toast.LENGTH_LONG).show()
             Log.e("MAIN-ERROR", e.toString())
             tetrisView.resumeGame()
         }

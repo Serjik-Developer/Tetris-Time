@@ -64,4 +64,19 @@
             android:backgroundTint="#AA0000" />
     </LinearLayout>
 
+    <!-- Новая большая кнопка -->
+    <Button
+
+        android:id="@+id/buttonBig"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="#0077CC"
+        android:text="Сделано!"
+        android:textColor="#FFFFFF"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dialogButtonRow" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
